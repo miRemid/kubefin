@@ -1,0 +1,90 @@
+# Copyright 2022 The KubeFin Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: KubeFin e2e
+
+on:
+  pull_request:
+    branches: [ 'main', 'release-*' ]
+
+env:
+  KIND_VERSION: 0.17.0
+  GOTESTSUM_VERSION: 1.7.0
+  KO_FLAGS: --platform=linux/amd64
+
+jobs:
+  test:
+    if: ${{ false }} # disbale for now
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        k8s-version:
+          - v1.24.7
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go 1.19.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19.x
+
+    - uses: kubefin/actions/composite/setup-ko@main
+
+    - uses: kubefin/actions/composite/setup-gotestsum@main
+      with:
+        version: ${GOTESTSUM_VERSION}
+
+    - uses: kubefin/actions/composite/setup-kind@main
+      with:
+        version: ${KIND_VERSION}
+
+    - name: Configure kind cluster
+      run: |
+        set -x
+
+        export K8S_VERSION=${{ matrix.k8s-version }}
+        hack/local-up-kubefin.sh
+
+    - name: Export KubeFin API
+      run: |
+        set -x
+
+        # wait 60 seconds to collect some metrics
+        sleep 60
+        kubectl port-forward -nkubefin svc/kubefin-cost-analyzer-service 8080:8080 --kubeconfig="${HOME}"/.kube/kubefin-server.config &
+
+    - name: E2E Test
+      run: |
+        set -x
+
+        gotestsum --format testname -- \
+          -race -count=1 -parallel=1 -tags=e2e -v \
+          -timeout=30m \
+          -short \
+          ./test/e2e
+
+    - name: Check resource
+      # Only upload logs on failure.
+      if: ${{ failure() }}
+      run: |
+        set -x
+
+        # checkout pods in primary cluster
+        kubectl get pods -A --kubeconfig="${HOME}"/.kube/kubefin-server.config
+        kubectl describe pod -A --kubeconfig="${HOME}"/.kube/kubefin-server.config
+        # checkout pods in secondary cluster
+        kubectl get pods -A --kubeconfig="${HOME}"/.kube/cluster-1.config
+        kubectl describe pod -A --kubeconfig="${HOME}"/.kube/cluster-1.config

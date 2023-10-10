@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mimir
+  namespace: kubefin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mimir
+  serviceName: mimir
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: mimir
+    spec:
+      containers:
+      - args:
+        - -target=all
+        - --config.file=/etc/mimir/config.yaml
+        image: grafana/mimir:2.6.0
+        imagePullPolicy: IfNotPresent
+        name: mimir
+        ports:
+          - containerPort: 9009
+            name: http
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 500m
+            memory: 500Mi
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+            - mountPath: /etc/mimir/config.yaml
+              name: mimir-config
+              subPath: config.yaml
+              readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 9009
+            scheme: HTTP
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mimir-config
+          configMap:
+            name: mimir-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: mimir
+  name: mimir
+  namespace: kubefin
+spec:
+  type: {MIMIR_SERVICE_TYPE}
+  ports:
+    - name: http
+      port: 9009
+      targetPort: 9009
+  selector:
+    app.kubernetes.io/component: mimir

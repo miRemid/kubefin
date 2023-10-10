@@ -1,0 +1,557 @@
+basePath: /api/v1
+definitions:
+  github_com_kubefin_kubefin_pkg_api.ClusterCostsSummary:
+    properties:
+      ClusterAvgHourlyCoreCost:
+        description: ClusterAvgDailyCost means average core/hour costs in current
+          month
+        type: number
+      cloudProvider:
+        type: string
+      clusterActiveTime:
+        description: ClusterActiveTime shows the cluster active time in seconds
+        type: number
+      clusterAvgDailyCost:
+        description: ClusterAvgDailyCost means average daily costs in current month
+        type: number
+      clusterConnectionSate:
+        description: ClusterConnectionSate can be running/connect_failed
+        type: string
+      clusterId:
+        type: string
+      clusterMonthCostCurrent:
+        description: ClusterMonthCostCurrent means the total cost in current month
+        type: number
+      clusterMonthEstimateCost:
+        description: ClusterMonthEstimateCost means the estimating cost with previous
+          7 days costs
+        type: number
+      clusterName:
+        type: string
+      clusterRegion:
+        type: string
+      connectionTime:
+        description: ConnectionTime shows the time the cluster connected
+        type: integer
+      lastActiveTime:
+        type: integer
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterCostsSummaryList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterCostsSummary'
+        type: array
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterMetricsSummary:
+    properties:
+      cloudProvider:
+        type: string
+      clusterActiveTime:
+        description: ClusterActiveTime shows the cluster active time in seconds
+        type: number
+      clusterConnectionSate:
+        description: ClusterConnectionSate can be running/connect_failed
+        type: string
+      clusterId:
+        type: string
+      clusterName:
+        type: string
+      clusterRegion:
+        type: string
+      connectionTime:
+        description: ConnectionTime shows the time the cluster connected
+        type: integer
+      cpuCoreCapacity:
+        description: CPUCoreCapacity means all nodes' cpu core capacity
+        type: number
+      cpuCoreRequest:
+        description: CPUCoreRequest means all pods' cpu core request
+        type: number
+      cpuCoreTotal:
+        description: CPUCoreTotal means all nodes' cpu core
+        type: number
+      cpuCoreUsage:
+        description: CPUCoreUsage means all pods' cpu core usage
+        type: number
+      fallbackBillingNodeNumbersCurrent:
+        type: integer
+      lastActiveTime:
+        type: integer
+      nodeNumbersCurrent:
+        type: integer
+      onDemandBillingNodeNumbersCurrent:
+        type: integer
+      periodBillingNodeNumbersCurrent:
+        type: integer
+      podScheduledCurrent:
+        type: integer
+      podTotalCurrent:
+        type: integer
+      podUnscheduledCurrent:
+        type: integer
+      ramGBCapacity:
+        description: RAMGBCapacity means all nodes' ram gb capacity
+        type: number
+      ramGBRequest:
+        description: RAMGBRequest all pods' ram gb request
+        type: number
+      ramGBTotal:
+        description: RAMGBTotal means all nodes' ram gb
+        type: number
+      ramGBUsage:
+        description: RAMGBUsage means all pods' ram gb usage
+        type: number
+      spotBillingNodeNumbersCurrent:
+        type: integer
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterMetricsSummaryList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterMetricsSummary'
+        type: array
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterNamespaceCost:
+    properties:
+      costList:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterNamespaceCostDetail'
+        type: array
+      namespace:
+        type: string
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterNamespaceCostDetail:
+    properties:
+      cpuCoreUsage:
+        type: number
+      cpuRequest:
+        type: number
+      podCount:
+        description: PodCount means the average pod count in this period
+        type: number
+      ramGBRequest:
+        type: number
+      ramGBUsage:
+        type: number
+      timestamp:
+        type: integer
+      totalCost:
+        type: number
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterNamespaceCostList:
+    properties:
+      clusterId:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterNamespaceCost'
+        type: array
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterResourceCost:
+    properties:
+      costFallbackBillingMode:
+        description: 'TODO: implement this type'
+        type: number
+      costOnDemandBillingMode:
+        type: number
+      costPeriodBillingMode:
+        type: number
+      costSpotBillingMode:
+        type: number
+      cpuCoreCount:
+        description: CPUCoreCount means the average core hour count in this period
+        type: number
+      cpuCoreUsage:
+        description: CPUCoreUsage means the average core hour usage in this period
+        type: number
+      cpuCost:
+        type: number
+      ramCost:
+        type: number
+      ramGBCount:
+        description: RAMGBCount means the average ram hour count in this period
+        type: number
+      ramGBUsage:
+        description: RAMGBUsage means the average ram hour usage in this period
+        type: number
+      timestamp:
+        description: Timestamp is in unix timestamp format, you can transform it to
+          any you want
+        type: integer
+      totalCost:
+        type: number
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterResourceCostList:
+    properties:
+      clusterId:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterResourceCost'
+        type: array
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterResourceMetrics:
+    properties:
+      clusterId:
+        type: string
+      resourceAllocatableValues:
+        items:
+          $ref: '#/definitions/model.SamplePair'
+        type: array
+      resourceCapacityValues:
+        items:
+          $ref: '#/definitions/model.SamplePair'
+        type: array
+      resourceRequestValues:
+        items:
+          $ref: '#/definitions/model.SamplePair'
+        type: array
+      resourceTotalValues:
+        items:
+          $ref: '#/definitions/model.SamplePair'
+        type: array
+      resourceType:
+        type: string
+      resourceUsageValues:
+        items:
+          $ref: '#/definitions/model.SamplePair'
+        type: array
+      unit:
+        type: string
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterWorkloadCost:
+    properties:
+      costList:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterWorkloadCostDetail'
+        type: array
+      namespace:
+        type: string
+      workloadName:
+        type: string
+      workloadType:
+        description: WorkloadType could be pod/daemonset/statefulset/deployment
+        type: string
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterWorkloadCostDetail:
+    properties:
+      cpuCoreRequest:
+        type: number
+      cpuCoreUsage:
+        type: number
+      podCount:
+        description: PodCount means the average pod count in this period
+        type: number
+      ramGBRequest:
+        type: number
+      ramGBUsage:
+        type: number
+      timestamp:
+        type: integer
+      totalCost:
+        type: number
+    type: object
+  github_com_kubefin_kubefin_pkg_api.ClusterWorkloadCostList:
+    properties:
+      clusterId:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterWorkloadCost'
+        type: array
+    type: object
+  github_com_kubefin_kubefin_pkg_api.StatusError:
+    properties:
+      apiVersion:
+        type: string
+      code:
+        type: integer
+      kind:
+        type: string
+      message:
+        type: string
+      reason:
+        type: string
+      status:
+        type: string
+    type: object
+  model.SamplePair:
+    properties:
+      timestamp:
+        type: string
+      value:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: KubeFin Cost Analyzer API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: KubeFin API
+  version: "0.1"
+paths:
+  /costs/clusters/{cluster_id}/namespace:
+    get:
+      description: Get specific cluster namespace costs with time range
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      - description: The start time to query
+        in: query
+        name: startTime
+        type: integer
+      - description: The end time to query
+        in: query
+        name: endTime
+        type: integer
+      - description: The step seconds of the data to return
+        in: query
+        name: stepSeconds
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterNamespaceCostList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get specific cluster namespace costs
+      tags:
+      - Costs
+  /costs/clusters/{cluster_id}/resource:
+    get:
+      description: Get detailed information on cluster resource costs, including CPU,
+        memory, and different billing modes.
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      - description: The start time to query
+        in: query
+        name: startTime
+        type: integer
+      - description: The end time to query
+        in: query
+        name: endTime
+        type: integer
+      - description: The step seconds of the data to return
+        in: query
+        name: stepSeconds
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterResourceCostList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get detailed information on cluster resource costs, including CPU,
+        memory, and different billing modes.
+      tags:
+      - Costs
+  /costs/clusters/{cluster_id}/summary:
+    get:
+      description: Get specific cluster costs summary in current two month
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterCostsSummary'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get specific cluster costs summary
+      tags:
+      - Costs
+  /costs/clusters/{cluster_id}/workload:
+    get:
+      description: Get specific cluster workloads costs with time range
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      - description: The start time to query
+        in: query
+        name: startTime
+        type: integer
+      - description: The end time to query
+        in: query
+        name: endTime
+        type: integer
+      - description: The step seconds of the data to return
+        in: query
+        name: stepSeconds
+        type: integer
+      - description: The aggregated way to show workload costs
+        in: query
+        name: aggregateBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterWorkloadCostList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get specific cluster workloads costs
+      tags:
+      - Costs
+  /costs/summary:
+    get:
+      description: Get all clusters costs summary in current two month
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterCostsSummaryList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get all clusters costs summary
+      tags:
+      - Costs
+  /metrics/clusters/{cluster_id}/cpu:
+    get:
+      description: Get specific cluster CPU metrics
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      - description: The start time to query
+        in: query
+        name: startTime
+        type: integer
+      - description: The end time to query
+        in: query
+        name: endTime
+        type: integer
+      - description: The step seconds of the data to return
+        in: query
+        name: stepSeconds
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterResourceMetrics'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get specific cluster CPU metrics
+      tags:
+      - Metrics
+  /metrics/clusters/{cluster_id}/memory:
+    get:
+      description: Get specific cluster memory metrics
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      - description: The start time to query
+        in: query
+        name: startTime
+        type: integer
+      - description: The end time to query
+        in: query
+        name: endTime
+        type: integer
+      - description: The step seconds of the data to return
+        in: query
+        name: stepSeconds
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterResourceMetrics'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get specific cluster memory metrics
+      tags:
+      - Metrics
+  /metrics/clusters/{cluster_id}/summary:
+    get:
+      description: Get specific cluster metrics summary in current two month
+      parameters:
+      - description: Cluster Id
+        in: path
+        name: cluster_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterMetricsSummary'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get specific cluster metrics summary
+      tags:
+      - Metrics
+  /metrics/summary:
+    get:
+      description: Get all clusters metrics summary in current two month
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.ClusterMetricsSummaryList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_kubefin_kubefin_pkg_api.StatusError'
+      summary: Get all clusters metrics summary
+      tags:
+      - Metrics
+swagger: "2.0"

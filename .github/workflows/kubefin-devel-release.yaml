@@ -1,0 +1,51 @@
+# Copyright 2022 The KubeFin Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Devel Release KubeFin
+
+on: workflow_dispatch
+
+env:
+  KO_DOCKER_REPO: docker.io/kubefin
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKERHUB_USER_NAME }}
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  TAG: "devel"
+
+jobs:
+  release:
+    name: Release KubeFin
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - uses: kubefin/actions/composite/setup-ko@main
+
+      - name: Build and Push images to dockerhub
+        run: |
+          export YAML_OUTPUT_DIR=${{ github.workspace }}/artifacts/build
+          mkdir -p ${YAML_OUTPUT_DIR}
+
+          ko login docker.io --username ${DOCKER_HUB_USERNAME} --password ${DOCKER_HUB_TOKEN}
+          ./hack/generate-yamls.sh "$GITHUB_WORKSPACE" "$(mktemp)" $YAML_OUTPUT_DIR/env
+
+      - name: Archive release yaml
+        uses: actions/upload-artifact@v3
+        with:
+          name: devel-release
+          path: ${{ github.workspace }}/artifacts/build/*.yaml
