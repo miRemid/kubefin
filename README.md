@@ -31,7 +31,12 @@ Coming soon.
 
 ## Getting Started
 
-To install the latest KubeFin release in primary cluster from the official manifest, run the following command.
+Before installing KubeFin, please ensure that the metrics-server is running. If it is not, please execute the following command:
+```sh
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+To install the latest KubeFin release in primary cluster from the official manifest, execute the following command.
 ```shell
 kubectl apply -f https://github.com/kubefin/kubefin/releases/latest/download/kubefin.yaml
 ```
