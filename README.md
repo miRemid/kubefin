@@ -6,6 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kubefin/kubefin/blob/main/LICENSE)
 [![Releases](https://img.shields.io/github/release/kubefin/kubefin/all.svg?style=flat-square)](https://github.com/kubefin/kubefin/releases)
+[![Docker Pulls](https://img.shields.io/docker/pulls/kubefin/kubefin-agent)](https://hub.docker.com/r/kubefin/kubefin-agent)
 
 ## Introduction
 
