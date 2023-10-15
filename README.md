@@ -4,9 +4,11 @@
     <i>Drive the most value from every dollar you invest in the cloud.</i>
 </p>
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubefin/kubefin)](https://goreportcard.com/report/github.com/kubefin/kubefin)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kubefin/kubefin/blob/main/LICENSE)
-[![Releases](https://img.shields.io/github/release/kubefin/kubefin/all.svg?style=flat-square)](https://github.com/kubefin/kubefin/releases)
+[![Releases](https://img.shields.io/github/release/kubefin/kubefin/all.svg)](https://github.com/kubefin/kubefin/releases)
 [![Docker Pulls](https://img.shields.io/docker/pulls/kubefin/kubefin-agent)](https://hub.docker.com/r/kubefin/kubefin-agent)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/7952/badge)](https://www.bestpractices.dev/en/projects/7952)
 
 ## Introduction
 
@@ -26,9 +28,13 @@ Easily view the cost overview of multiple clusters from different clouds in one 
 
 <img src="./docs/resources/cost-insights-all-clusters.png" width="45%"> <img src="./docs/resources/cost-insights-single-cluster.png" width="45%">
 
-### Cost optimization
+### Optimize Cost automatically(Available soon)
 
-Coming soon.
+Once KubeFin is installed in clusters, it will analyze cloud resources usage and do right-sizing(CPU/Memory Request right-sizing, EC2 nodes' spec right-sizing and Spot optimization etc) automatically to reduce your cloud cost up to 40%.
+
+### Optimize Cost Continually(Available soon)
+
+KubeFin will continuously profile and categorize workloads within the cluster in detail, enabling each application to be scheduled to the most "suitable" node, to ensure ongoing resource usage optimization and cost optimization.
 
 ## Getting Started
 
