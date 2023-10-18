@@ -44,7 +44,7 @@ jobs:
           mkdir -p ${YAML_OUTPUT_DIR}
 
           ko login docker.io --username ${DOCKER_HUB_USERNAME} --password ${DOCKER_HUB_TOKEN}
-          ./hack/generate-yamls.sh "$GITHUB_WORKSPACE" "$(mktemp)" $YAML_OUTPUT_DIR/env
+          ./hack/release-yamls.sh "$GITHUB_WORKSPACE" $YAML_OUTPUT_DIR/
 
       - name: Archive release yaml
         uses: actions/upload-artifact@v3
