@@ -49,3 +49,9 @@ data:
     store_gateway:
       sharding_ring:
         replication_factor: 1
+
+    # referring to
+    # 1.https://github.com/grafana/loki/issues/5123
+    # 2.https://grafana.com/docs/mimir/latest/references/configuration-parameters/
+    frontend:
+      max_outstanding_per_tenant: 4096
