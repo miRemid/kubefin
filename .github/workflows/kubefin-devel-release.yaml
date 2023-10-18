@@ -22,7 +22,7 @@ env:
   KO_DOCKER_REPO: kubefin
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKERHUB_USER_NAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  TAG: "latest"
+  TAG: "devel"
 
 jobs:
   release:

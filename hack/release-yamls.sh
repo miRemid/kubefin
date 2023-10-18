@@ -57,11 +57,8 @@ cd "${YAML_REPO_ROOT}"
 # delete debug component for release
 rm -rf config_primary/third_party/grafana.yaml
 
-# relace dashboard version
-sed -i'' -e "s/{KUBEFIN_DASHBOARD_VERSION}/${TAG}/" config_primary/core/deployments/kubefin-cost-analyzer.yaml
-
 echo "Building KubeFin"
 ko resolve ${KO_YAML_FLAGS} -t ${TAG} --tag-only -B -R -f config_primary/core/ | "${LABEL_YAML_CMD[@]}" > "${KUBEFIN_YAML}"
 ko resolve ${KO_YAML_FLAGS} -t ${TAG} --tag-only -B -R -f config_primary/third_party/ | "${LABEL_YAML_CMD[@]}" >> "${KUBEFIN_YAML}"
 
-echo "All manifests generated"
+echo "All manifests are generated"

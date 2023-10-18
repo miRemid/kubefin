@@ -30,7 +30,7 @@ function init_primary_config() {
   cloud_provider=$1
   cluster_name=$2
   multi_cluster_enable=$3
-  tag=$4
+  dashboard_tag=$4
 
   mimir_service_type="ClusterIP"
   if [[ "${multi_cluster_enable}" == "true" ]]; then
@@ -46,7 +46,7 @@ function init_primary_config() {
   sed -i'' -e "s/{CLUSTER_ID}//g" config_primary/core/deployments/kubefin-agent.yaml
   sed -i'' -e "s/{CLUSTER_NAME}/${cluster_name}/g" config_primary/core/deployments/kubefin-agent.yaml
   sed -i'' -e "s/{MIMIR_SERVICE_TYPE}/${mimir_service_type}/g" config_primary/third_party/mimir.yaml
-  sed -i'' -e "s/{KUBEFIN_DASHBOARD_VERSION}/${tag}/" config_primary/core/deployments/kubefin-cost-analyzer.yaml
+  sed -i'' -e "s/{KUBEFIN_DASHBOARD_VERSION}/${dashboard_tag}/" config_primary/core/deployments/kubefin-cost-analyzer.yaml
 }
 
 function init_secondary_config() {
