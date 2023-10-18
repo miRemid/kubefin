@@ -14,17 +14,19 @@
 
 name: Devel Release KubeFin
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [ 'main' ]
 
 env:
-  KO_DOCKER_REPO: docker.io/kubefin
+  KO_DOCKER_REPO: kubefin
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKERHUB_USER_NAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  TAG: "devel"
+  TAG: "latest"
 
 jobs:
   release:
-    name: Release KubeFin
+    name: Release devel KubeFin
     runs-on: ubuntu-latest
 
     steps:
