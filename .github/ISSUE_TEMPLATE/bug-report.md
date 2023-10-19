@@ -6,13 +6,15 @@ labels: kind/bug
 assignees: ''
 
 ---
-<!--
+
 ## In what area(s)?
-Remove the '> ' to select
+<!--
+Select the most relevant area(s).
 > /area API
 > /area build
 > /area agent
 > /area cost-analyzer
+> /area dashboard
 
 Other classifications:
 > /kind good-first-issue
