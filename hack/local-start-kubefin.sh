@@ -68,7 +68,7 @@ kubectl apply -f "${TMP_DIR}"/components.yaml --kubeconfig=${HOME}/.kube/cluster
 
 # Setup primary cluster
 echo_info "Start to setup primary cluster..."
-hack/init-primary-config.sh default kubefin-server true latest
+hack/init-primary-config.sh default kubefin-server true "devel"
 
 export KIND_CLUSTER_NAME=kubefin-server
 export KUBECONFIG=${HOME}/.kube/kubefin-server.config

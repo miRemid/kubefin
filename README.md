@@ -50,7 +50,7 @@ kubectl apply -f https://github.com/kubefin/kubefin/releases/latest/download/kub
 
 Once your KubeFin has been installed, wait for the pod to be ready and port forward with:
 ```shell
-kubectl port-forward -nkubefin svc/kubefin-cost-analyzer-service 8080 3000
+kubectl port-forward -nkubefin svc/kubefin-cost-analyzer-service --address='0.0.0.0' 8080 3000
 ```
 
 To verify that the dashboard and server are running, you may access the KubeFin dashboard at `http://localhost:3000`.
