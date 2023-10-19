@@ -1,6 +1,6 @@
 ---
 name: 'Feature request '
-about: Suggest an idea for the roadmap! The team will review.
+about: Suggest an idea for the roadmap! The community will review.
 title: "[request]: describe request here"
 labels: Proposed
 assignees: ''
