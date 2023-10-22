@@ -77,8 +77,3 @@ type TenantCalculator struct {
 	Tenant         string                          `json:"tenant"`
 	Configurations []TenantCalculatorConfiguration `json:"configurations"`
 }
-
-type NodeSpec struct {
-	CPUCount   float64
-	RAMGBCount float64
-}

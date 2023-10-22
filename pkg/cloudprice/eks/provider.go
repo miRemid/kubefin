@@ -15,3 +15,57 @@ limitations under the License.
 */
 
 package eks
+
+import (
+	"strconv"
+	"sync"
+
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+
+	"github.com/kubefin/kubefin/cmd/kubefin-agent/app/options"
+	"github.com/kubefin/kubefin/pkg/api"
+	cloudpriceapis "github.com/kubefin/kubefin/pkg/cloudprice/apis"
+)
+
+type EksCloudProvider struct {
+	client kubernetes.Interface
+
+	cpuMemoryCostRatio float64
+
+	// nodePriceMap maps [region name][node type]price
+	nodePriceMap  map[string]map[string]float64
+	nodePriceLock sync.Mutex
+
+	// nodeSpecMap maps [node type]NodeSpec
+	nodeSpecMap  map[string]cloudpriceapis.NodeSpec
+	nodeSpecLock sync.Mutex
+}
+
+func NewEksCloudProvider(client kubernetes.Interface, agentOptions *options.AgentOptions) (*EksCloudProvider, error) {
+	var err error
+
+	cpuMemoryCostRatio := cloudpriceapis.DefaultCPUMemoryCostRatio
+	if agentOptions.CPUMemoryCostRatio != "" {
+		cpuMemoryCostRatio, err = strconv.ParseFloat(agentOptions.CPUMemoryCostRatio, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	eksCloud := EksCloudProvider{
+		client:             client,
+		cpuMemoryCostRatio: cpuMemoryCostRatio,
+		nodePriceMap:       map[string]map[string]float64{},
+		nodeSpecMap:        map[string]cloudpriceapis.NodeSpec{},
+	}
+
+	return &eksCloud, nil
+}
+
+func (e *EksCloudProvider) ParseClusterInfo(agentOptions *options.AgentOptions) error {
+	return nil
+}
+
+func (e *EksCloudProvider) GetNodeHourlyPrice(node *v1.Node) (*api.InstancePriceInfo, error) {
+	return nil, nil
+}

@@ -33,6 +33,8 @@ import (
 
 	"github.com/kubefin/kubefin/cmd/kubefin-agent/app/options"
 	"github.com/kubefin/kubefin/pkg/api"
+	"github.com/kubefin/kubefin/pkg/cloudprice/apis"
+	cloudpriceapis "github.com/kubefin/kubefin/pkg/cloudprice/apis"
 	"github.com/kubefin/kubefin/pkg/values"
 )
 
@@ -43,8 +45,6 @@ const (
 
 	nodePriceQueryUrl = "https://buy-api.aliyun.com/price/getLightWeightPrice2.json?tenant=TenantCalculator"
 	nodeSpecQueryUrl  = "https://query.aliyun.com/rest/sell.ecs.allInstanceTypes?domain=aliyun&saleStrategy=PostPaid"
-
-	defaultCPUMemoryCostRatio = 3.0
 )
 
 type AckCloudProvider struct {
@@ -57,14 +57,14 @@ type AckCloudProvider struct {
 	nodePriceLock sync.Mutex
 
 	// nodeSpecMap maps [node type]NodeSpec
-	nodeSpecMap  map[string]NodeSpec
+	nodeSpecMap  map[string]cloudpriceapis.NodeSpec
 	nodeSpecLock sync.Mutex
 }
 
 func NewAckCloudProvider(client kubernetes.Interface, agentOptions *options.AgentOptions) (*AckCloudProvider, error) {
 	var err error
 
-	cpuMemoryCostRatio := defaultCPUMemoryCostRatio
+	cpuMemoryCostRatio := apis.DefaultCPUMemoryCostRatio
 	if agentOptions.CPUMemoryCostRatio != "" {
 		cpuMemoryCostRatio, err = strconv.ParseFloat(agentOptions.CPUMemoryCostRatio, 64)
 		if err != nil {
@@ -75,7 +75,7 @@ func NewAckCloudProvider(client kubernetes.Interface, agentOptions *options.Agen
 		client:             client,
 		cpuMemoryCostRatio: cpuMemoryCostRatio,
 		nodePriceMap:       map[string]map[string]float64{},
-		nodeSpecMap:        map[string]NodeSpec{},
+		nodeSpecMap:        map[string]apis.NodeSpec{},
 	}
 
 	return &ackCloud, nil
@@ -202,7 +202,7 @@ func queryNodePriceFromCloud(nodeRegion, nodeType string) (float64, error) {
 	return priceResult.Data.Order.TradeAmount, nil
 }
 
-func queryNodeSpecFromCloud(nodeSpec map[string]NodeSpec) error {
+func queryNodeSpecFromCloud(nodeSpec map[string]cloudpriceapis.NodeSpec) error {
 	resp, err := http.Get(nodeSpecQueryUrl)
 	if err != nil {
 		klog.Errorf("Query AliCloud ecs spec error:%v", err)
@@ -234,7 +234,7 @@ func queryNodeSpecFromCloud(nodeSpec map[string]NodeSpec) error {
 				klog.Errorf("Can not parse memory count(%s):%v", instance.MemorySize, err)
 				return err
 			}
-			nodeSpec[nodeType] = NodeSpec{
+			nodeSpec[nodeType] = cloudpriceapis.NodeSpec{
 				CPUCount:   cpuCount,
 				RAMGBCount: memoryCount,
 			}
