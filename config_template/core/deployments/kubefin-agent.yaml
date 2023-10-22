@@ -87,11 +87,8 @@ spec:
         image: otel/opentelemetry-collector-contrib:0.72.0
         resources:
           requests:
-            cpu: 10m
-            memory: 10Mi
-          limits:
             cpu: 500m
-            memory: 500Mi
+            memory: 1500Mi
         volumeMounts:
           - mountPath: /etc/otelcol-contrib/config.yaml
             name: otel-collector-config
