@@ -26,7 +26,7 @@ env:
   TAG: ${{ github.ref_name }}
 
 jobs:
-  release:
+  kubefin-release:
     name: Release KubeFin
     runs-on: ubuntu-latest
 
@@ -50,3 +50,33 @@ jobs:
       - uses: softprops/action-gh-release@v1
         with:
           files: ${{ github.workspace }}/artifacts/build/*.yaml
+
+  dashboard-release:
+    name: Release KubeFin Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USER_NAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: KubeFin Dashboard - build and push
+      uses: docker/build-push-action@v3
+      with:
+        context: ./
+        file: ./Dockerfile
+        platforms: |
+          linux/amd64
+        push: true
+        tags: kubefin/kubefin-dashboard:${{ github.ref_name }}
+
