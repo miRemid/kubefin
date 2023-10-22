@@ -140,9 +140,11 @@ func (w *WorkloadLevelMetricsCollector) collectDaemonSetResourceMetrics(agentOpt
 			klog.Errorf("Marshal daemonSet labels error:%v", err)
 			continue
 		}
-
-		matchLabels := daemonSet.Spec.Selector.MatchLabels
-		selector := labels.Set(matchLabels).AsSelector()
+		selector, err := metav1.LabelSelectorAsSelector(daemonSet.Spec.Selector)
+		if err != nil {
+			klog.Errorf("Parse deployment selector error:%v", err)
+			return
+		}
 
 		containerNoneCareLabelValues := prometheus.Labels{
 			values.WorkloadTypeLabelKey: "daemonset",
@@ -216,7 +218,9 @@ func (w *WorkloadLevelMetricsCollector) collectDaemonSetRequestMetrics(ds *appsv
 }
 
 func (w *WorkloadLevelMetricsCollector) collectDaemonSetUsageMetrics(ds *appsv1.DaemonSet, agentOptions *options.AgentOptions, selector labels.Selector, labels prometheus.Labels) {
-	pods, err := w.metricsClient.MetricsV1beta1().PodMetricses(ds.Namespace).List(context.TODO(), metav1.ListOptions{})
+	pods, err := w.metricsClient.MetricsV1beta1().PodMetricses(ds.Namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: selector.String(),
+	})
 	if err != nil {
 		klog.Errorf("List all pod metrics error:%v, kubernetes metrics server may not be installed", err)
 		return
@@ -282,9 +286,11 @@ func (w *WorkloadLevelMetricsCollector) collectStatefulSetResourceMetrics(agentO
 			klog.Errorf("Marshal daemonSet labels error:%v", err)
 			continue
 		}
-
-		matchLabels := statefulSet.Spec.Selector.MatchLabels
-		selector := labels.Set(matchLabels).AsSelector()
+		selector, err := metav1.LabelSelectorAsSelector(statefulSet.Spec.Selector)
+		if err != nil {
+			klog.Errorf("Parse deployment selector error:%v", err)
+			return
+		}
 
 		containerNoneCareLabelValues := prometheus.Labels{
 			values.WorkloadTypeLabelKey: "statefulset",
@@ -358,7 +364,9 @@ func (w *WorkloadLevelMetricsCollector) collectStatefulSetRequestMetrics(sf *app
 }
 
 func (w *WorkloadLevelMetricsCollector) collectStatefulSetUsageMetrics(sf *appsv1.StatefulSet, agentOptions *options.AgentOptions, selector labels.Selector, labels prometheus.Labels) {
-	pods, err := w.metricsClient.MetricsV1beta1().PodMetricses(sf.Namespace).List(context.TODO(), metav1.ListOptions{})
+	pods, err := w.metricsClient.MetricsV1beta1().PodMetricses(sf.Namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: selector.String(),
+	})
 	if err != nil {
 		klog.Errorf("List all pod metrics error:%v, kubernetes metrics server may not be installed", err)
 		return
@@ -421,8 +429,11 @@ func (w *WorkloadLevelMetricsCollector) collectDeploymentResourceMetrics(agentOp
 			klog.Errorf("Marshal daemonSet labels error:%v", err)
 			continue
 		}
-		matchLabels := deployment.Spec.Selector.MatchLabels
-		selector := labels.Set(matchLabels).AsSelector()
+		selector, err := metav1.LabelSelectorAsSelector(deployment.Spec.Selector)
+		if err != nil {
+			klog.Errorf("Parse deployment selector error:%v", err)
+			return
+		}
 
 		containerNoneCareLabelValues := prometheus.Labels{
 			values.WorkloadTypeLabelKey: "deployment",
@@ -496,7 +507,9 @@ func (w *WorkloadLevelMetricsCollector) collectDeploymentRequestMetrics(dm *apps
 }
 
 func (w *WorkloadLevelMetricsCollector) collectDeploymentUsageMetrics(dm *appsv1.Deployment, agentOptions *options.AgentOptions, selector labels.Selector, labels prometheus.Labels) {
-	pods, err := w.metricsClient.MetricsV1beta1().PodMetricses(dm.Namespace).List(context.TODO(), metav1.ListOptions{})
+	pods, err := w.metricsClient.MetricsV1beta1().PodMetricses(dm.Namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: selector.String(),
+	})
 	if err != nil {
 		klog.Errorf("List all pod metrics error:%v, kubernetes metrics server may not be installed", err)
 		return
