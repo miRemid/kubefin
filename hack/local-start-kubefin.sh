@@ -93,4 +93,4 @@ kubectl rollout status deployment/kubefin-agent -nkubefin --kubeconfig="${HOME}"
 kubectl rollout status deployment/kubefin-cost-analyzer -nkubefin --kubeconfig="${HOME}"/.kube/kubefin-server.config --timeout=600s
 
 echo_info "Run the following command to export the API and Web UI:"
-echo_note "kubectl port-forward -nkubefin svc/kubefin-cost-analyzer-service --kubeconfig=${HOME}/.kube/kubefin-server.config 8080 3000"
+echo_note "kubectl port-forward -nkubefin svc/kubefin-cost-analyzer-service --kubeconfig=${HOME}/.kube/kubefin-server.config --address='0.0.0.0' 8080 3000"
