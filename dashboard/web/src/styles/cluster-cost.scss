@@ -1,0 +1,14 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+@use './base';
+
+#compute-spend-trend > * {
+  display: inline-flex;
+  flex-direction: column;
+  margin:0 2px;
+}
+#avg-monthly-cost-trend > * {
+  display: inline-flex;
+  flex-direction: column;
+  margin:0 2px;
+}

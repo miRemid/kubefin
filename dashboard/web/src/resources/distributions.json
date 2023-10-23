@@ -1,0 +1,412 @@
+[
+  {
+    "id": "CMRVMLFVHDVHU0",
+    "clusterName": "eks-cluster-01",
+    "region": "us-east-1",
+    "nodes": "112",
+    "cpu": "3067.3",
+    "memory": "765",
+    "computeCost": "54378.8",
+    "state": "Deactivated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  },
+  {
+    "id": "YHUVMLUYHDVHU0",
+    "clusterName": "ack-cluster-01",
+    "region": "cn-bj-01",
+    "nodes": "812",
+    "cpu": "8067.3",
+    "memory": "965",
+    "computeCost": "4378.8",
+    "state": "Activated"
+  }
+]
