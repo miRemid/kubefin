@@ -73,8 +73,8 @@ jobs:
     - name: KubeFin Dashboard - build and push
       uses: docker/build-push-action@v3
       with:
-        context: ./
-        file: ./Dockerfile
+        context: ./dashboard
+        file: ./dashboard/Dockerfile
         platforms: |
           linux/amd64
         push: true
