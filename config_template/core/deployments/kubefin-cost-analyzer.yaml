@@ -46,9 +46,9 @@ spec:
             - name: QUERY_BACKEND_ENDPOINT
               value: "http://mimir.kubefin.svc.cluster.local:9009/prometheus"
           resources:
-          requests:
-            cpu: 500m
-            memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
           ports:
             - name: healthcheck
               containerPort: 9090
