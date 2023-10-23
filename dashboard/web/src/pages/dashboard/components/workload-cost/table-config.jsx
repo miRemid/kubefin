@@ -1,8 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
+// SPDX-License-Identifier: MIT-0
 import { keepThreeDecimal, keepTwoDecimal } from "../components-common";
 
-// SPDX-License-Identifier: MIT-0
 export const COLUMN_DEFINITIONS_WORKLOAD = [
   {
     id: "workloadName",
