@@ -1,12 +1,21 @@
 export class CPU {
-  constructor(totalCPUCores, requestedCPU,
-    allocatableCPU, CPUusage, requestedCPUArray, allocatableCPUArray, totalCPUArray) {
+  constructor(
+    totalCPUCores,
+    requestedCPU,
+    availableCPU,
+    CPUUsage,
+    totalCPUArray,
+    systemReservedCPUArray,
+    requestedCPUArray,
+    availableCPUArray) {
     this.totalCPUCores = totalCPUCores;
     this.requestedCPU = requestedCPU;
-    this.allocatableCPU = allocatableCPU;
-    this.CPUusage = CPUusage;
-    this.requestedCPUArray = requestedCPUArray;
-    this.allocatableCPUArray = allocatableCPUArray;
+    this.availableCPU = availableCPU;
+    this.CPUUsage = CPUUsage;
     this.totalCPUArray = totalCPUArray;
+    this.systemReservedCPUArray = systemReservedCPUArray;
+    this.systemReservedCPUArray = systemReservedCPUArray;
+    this.requestedCPUArray = requestedCPUArray;
+    this.availableCPUArray = availableCPUArray;
   }
 }

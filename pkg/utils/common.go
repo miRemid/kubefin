@@ -24,6 +24,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/common/model"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kubefin/kubefin/pkg/api"
 	"github.com/kubefin/kubefin/pkg/values"
@@ -104,4 +105,12 @@ func GetCurrentMonthFirstLastDay() (int64, int64, error) {
 
 func GetCurrentTwoMonthStartEndTime() (start, end int64) {
 	return time.Now().AddDate(0, -2, 0).Unix(), time.Now().Unix()
+}
+
+func ConvertQualityToGiB(value resource.Quantity) float64 {
+	return value.AsApproximateFloat64() / values.GBInBytes
+}
+
+func ConvertQualityToCore(value resource.Quantity) float64 {
+	return value.AsApproximateFloat64()
 }

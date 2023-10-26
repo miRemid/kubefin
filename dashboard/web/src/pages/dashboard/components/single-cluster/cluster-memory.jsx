@@ -37,19 +37,19 @@ export default function ClusterMemory(props) {
       <ColumnLayout columns="4" variant="text-grid">
         <div>
           <Box variant="awsui-key-label">Total memory</Box>
-          <CounterLink>{keepTwoDecimal(cluster.Memory.totalMEM)}</CounterLink>
+          <CounterLink>{keepTwoDecimal(cluster.Memory.totalMem)}</CounterLink>
         </div>
         <div>
           <Box variant="awsui-key-label">Memory requested</Box>
-          <CounterLink>{keepTwoDecimal(cluster.Memory.requestedMEM)}</CounterLink>
+          <CounterLink>{keepTwoDecimal(cluster.Memory.requestedMem)}</CounterLink>
         </div>
         <div>
-          <Box variant="awsui-key-label">Memory allocatable</Box>
-          <CounterLink>{keepTwoDecimal(cluster.Memory.allocatableMEM)}</CounterLink>
+          <Box variant="awsui-key-label">Memory available</Box>
+          <CounterLink>{keepTwoDecimal(cluster.Memory.availableMem)}</CounterLink>
         </div>
         <div>
           <Box variant="awsui-key-label">Memory utilization</Box>
-          <CounterLink>{keepTwoDecimal(cluster.Memory.MEMusage/cluster.Memory.totalMEM*100)}%</CounterLink>
+          <CounterLink>{keepTwoDecimal(cluster.Memory.requestedMem/cluster.Memory.totalMem*100)}%</CounterLink>
         </div>
       </ColumnLayout>
     </Container>

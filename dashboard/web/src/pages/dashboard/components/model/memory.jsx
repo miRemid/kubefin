@@ -1,19 +1,21 @@
 export class Memory {
   constructor(
-    totalMEM,
-    requestedMEM,
-    allocatableMEM,
-    MEMusage,
+    totalMem,
+    requestedMem,
+    availableMem,
+    MemUsage,
+    totalMemoryArray,
+    systemReservedMemoryArray,
     requestedMemoryArray,
-    allocatableMemoryArray,
-    totalMemoryArray
+    availableMemoryArray,
   ) {
-    this.totalMEM = totalMEM;
-    this.requestedMEM = requestedMEM;
-    this.allocatableMEM = allocatableMEM;
-    this.MEMusage = MEMusage;
-    this.requestedMemoryArray = requestedMemoryArray;
-    this.allocatableMemoryArray = allocatableMemoryArray;
+    this.totalMem = totalMem;
+    this.requestedMem = requestedMem;
+    this.availableMem = availableMem;
+    this.MemUsage = MemUsage;
     this.totalMemoryArray = totalMemoryArray;
+    this.systemReservedMemoryArray = systemReservedMemoryArray;
+    this.requestedMemoryArray = requestedMemoryArray;
+    this.availableMemoryArray = availableMemoryArray;
   }
 }

@@ -14,10 +14,11 @@ import { Node } from "../model/node";
 import { Memory } from "../model/memory";
 import { CPU } from "../model/cpu";
 import { keepTwoDecimal } from "../components-common";
+import { ParseArrayIntoTimeSeriesData } from "../../../commons/common-components";
+
 
 export default function ClusterCPUUtilization(props) {
   let cluster = props.cluster;
-  // console.log("cluster = ",cluster);
   if (cluster === undefined || cluster === null) {
     cluster = new Cluster(
       "-",
@@ -26,35 +27,19 @@ export default function ClusterCPUUtilization(props) {
       "-",
       new Pod(0, 0, 0, 0),
       new Node(0, 0, 0, 0),
-      new Memory(0, 0, 0, 0, [0, 0], [0, 0], [0, 0]),
-      new CPU(0, 0, 0, 0, [0, 0], [0, 0], [0, 0])
+      new Memory(0, 0, 0, 0, [0, 0], [0, 0], [0, 0], [0, 0]),
+      new CPU(0, 0, 0, 0, [0, 0], [0, 0], [0, 0], [0, 0])
     );
   }
 
   const requestedCPUArray = cluster.CPU.requestedCPUArray;
-  const allocatableCPUArray = cluster.CPU.allocatableCPUArray;
+  const availableCPUArray = cluster.CPU.availableCPUArray;
+  const systemReservedArray = cluster.CPU.systemReservedArray;
   const totalCPUArray = cluster.CPU.totalCPUArray;
 
-  var cpuRequestedData = [];
-  var cpuAllocatableData = [];
-
-  requestedCPUArray.map(function (item) {
-    const data = {
-      x: new Date(item[0] * 1000),
-      y: Number(item[1]),
-    };
-    cpuRequestedData.push(data);
-    return cpuRequestedData;
-  });
-
-  allocatableCPUArray.map(function (item) {
-    const data = {
-      x: new Date(item[0] * 1000),
-      y: Number(item[1]),
-    };
-    cpuAllocatableData.push(data);
-    return cpuAllocatableData;
-  });
+  var cpuRequestedData = ParseArrayIntoTimeSeriesData(requestedCPUArray);
+  var cpuAvailableData = ParseArrayIntoTimeSeriesData(availableCPUArray);
+  var cpuSystemReservedData = ParseArrayIntoTimeSeriesData(systemReservedArray);
 
   var yMax = 1;
   totalCPUArray.map(function (item) {
@@ -64,33 +49,49 @@ export default function ClusterCPUUtilization(props) {
     return yMax;
   });
 
+  var series = []
+  if (cpuSystemReservedData.length !== 0) {
+    series.push({
+      title: "System reserved CPU",
+      type: "area",
+      data: cpuSystemReservedData,
+      color: "#FFFF00",
+      valueFormatter: function o(e) {
+        return keepTwoDecimal(e) + " C";
+      },
+    })
+  }
+  if (cpuRequestedData.length !== 0) {
+    series.push({
+      title: "Requested CPU",
+      type: "area",
+      data: cpuRequestedData,
+      color: "#FF0000",
+      valueFormatter: function o(e) {
+        return keepTwoDecimal(e) + " C";
+      },
+    })
+  }
+  if (cpuAvailableData.length !== 0) {
+    series.push({
+      title: "Available CPU",
+      type: "area",
+      color: "#0000CD",
+      data: cpuAvailableData,
+      valueFormatter: function o(e) {
+        return keepTwoDecimal(e) + " C";
+      },
+    })
+  };
+
   return (
     <Container
       className="custom-dashboard-container"
       header={<Header variant="h2">CPU utilization</Header>}
     >
       <AreaChart
-        series={[
-          {
-            title: "Requested CPU",
-            type: "area",
-            data: cpuRequestedData,
-            color: "#FF0000",
-            valueFormatter: function o(e) {
-              return keepTwoDecimal(e) + " C";
-            },
-          },
-          {
-            title: "Allocatable CPU",
-            type: "area",
-            color: "#0000CD",
-            data: cpuAllocatableData,
-            valueFormatter: function o(e) {
-              return keepTwoDecimal(e) + " C";
-            },
-          },
-        ]}
-        xDomain={[cpuAllocatableData[0].x, cpuAllocatableData[cpuAllocatableData.length - 1].x]}
+        series={series}
+        xDomain={[cpuAvailableData[0].x, cpuAvailableData[cpuAvailableData.length - 1].x]}
         yDomain={[0, yMax * 1.2]}
         i18nStrings={{
           filterLabel: "Filter displayed data",

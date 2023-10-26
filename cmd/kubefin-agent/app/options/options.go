@@ -37,8 +37,8 @@ type AgentOptions struct {
 	ClusterName   string
 	ClusterId     string
 
-	CPUCoreReserved        string
-	RAMGBReserved          string
+	NodeCPUCoreDeviation   string
+	NodeRAMGBDeviation     string
 	CPUMemoryCostRatio     string
 	CustomCPUCoreHourPrice string
 	CustomRAMGBHourPrice   string
@@ -63,8 +63,8 @@ func NewAgentOptions() *AgentOptions {
 		CPUMemoryCostRatio:     os.Getenv(values.CPUMemoryCostRatioEnv),
 		CustomCPUCoreHourPrice: os.Getenv(values.CustomCPUCoreHourPriceEnv),
 		CustomRAMGBHourPrice:   os.Getenv(values.CustomRAMGBHourPriceEnv),
-		CPUCoreReserved:        os.Getenv(values.CPUCorReservedEnv),
-		RAMGBReserved:          os.Getenv(values.RAMGBReservedEnv),
+		NodeCPUCoreDeviation:   os.Getenv(values.NodeCPUDeviationEnv),
+		NodeRAMGBDeviation:     os.Getenv(values.NodeRAMDeviationEnv),
 	}
 }
 

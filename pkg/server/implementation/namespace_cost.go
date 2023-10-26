@@ -140,7 +140,7 @@ func parseNamespaceResourceRequest(nsCost map[string]map[int64]*api.ClusterNames
 					Timestamp: timeStamp,
 				}
 			}
-			item[timeStamp].RAMGBRequest = v / float64(stepSeconds) * values.HourInSeconds
+			item[timeStamp].RAMGiBRequest = v / float64(stepSeconds) * values.HourInSeconds
 		}
 	}
 }
@@ -169,12 +169,12 @@ func parseNamespaceResourceUsage(nsCost map[string]map[int64]*api.ClusterNamespa
 		}
 		for timeStamp, v := range details {
 			if _, ok := item[timeStamp]; ok {
-				item[timeStamp].RAMGBUsage = v
+				item[timeStamp].RAMGiBUsage = v
 				continue
 			}
 			item[timeStamp] = &api.ClusterNamespaceCostDetail{
-				Timestamp:  timeStamp,
-				RAMGBUsage: v,
+				Timestamp:   timeStamp,
+				RAMGiBUsage: v,
 			}
 		}
 	}

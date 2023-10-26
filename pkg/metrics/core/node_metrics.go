@@ -19,13 +19,16 @@ package core
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	v1 "k8s.io/client-go/listers/core/v1"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 	"k8s.io/metrics/pkg/client/clientset/versioned"
 
@@ -36,23 +39,32 @@ import (
 	"github.com/kubefin/kubefin/pkg/values"
 )
 
+type nodeResourceInfo struct {
+	allocatableResource corev1.ResourceList
+	requestedResource   corev1.ResourceList
+}
+
 type NodeLevelMetricsCollector struct {
 	metricsClient *versioned.Clientset
 	provider      cloudprice.CloudProviderInterface
 	nodeLister    v1.NodeLister
 
+	mutex        sync.Mutex
+	nodeResouece map[string]nodeResourceInfo
+
 	nodeCPUCoreCostGV             *prometheus.GaugeVec
 	nodeRAMGBCostGV               *prometheus.GaugeVec
 	nodeResourceHourlyTotalCostGV *prometheus.GaugeVec
 	nodeTotalCostGV               *prometheus.GaugeVec
-	nodeResourceUsageGV           *prometheus.GaugeVec
-	nodeResourceAllocatableGV     *prometheus.GaugeVec
-	nodeResourceCapacityGV        *prometheus.GaugeVec
-	nodeResourceTotalGV           *prometheus.GaugeVec
+
+	nodeResourceTotalGV       *prometheus.GaugeVec
+	nodeResourceSystemTakenGV *prometheus.GaugeVec
+	nodeResourceAvailableGV   *prometheus.GaugeVec
+	nodeResourceUsageGV       *prometheus.GaugeVec
 }
 
 func NewNodeLevelMetricsCollector(client *versioned.Clientset, provider cloudprice.CloudProviderInterface,
-	lister v1.NodeLister) *NodeLevelMetricsCollector {
+	coreResourceInformerLister *api.CoreResourceInformerLister) *NodeLevelMetricsCollector {
 	metricsCostLabelKey := []string{
 		values.NodeNameLabelKey,
 		values.NodeInstanceTypeLabelKey,
@@ -95,34 +107,170 @@ func NewNodeLevelMetricsCollector(client *versioned.Clientset, provider cloudpri
 		values.ResourceTypeLabelKey,
 		values.BillingModeLabelKey,
 	}
-	nodeResourceUsageGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: values.NodeResourceUsageMetricsName,
-		Help: "The node resource usage for the node"}, resourceMetricsLabelKey)
-	nodeResourceAllocatableGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: values.NodeResourceAllocatableMetricsName,
-		Help: "The node resource allocatable for the node"}, resourceMetricsLabelKey)
-	nodeResourceCapacityGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: values.NodeResourceCapacityMetricsName,
-		Help: "The node resource capacity for the node"}, resourceMetricsLabelKey)
+
 	nodeResourceTotalGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: values.NodeResourceTotalMetricsName,
 		Help: "The total node resource for the node"}, resourceMetricsLabelKey)
+	nodeResourceSystemTakenGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: values.NodeResourceSystemTakenName,
+		Help: "The total node resoruce taken by system"}, resourceMetricsLabelKey)
+	nodeResourceAvailableGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: values.NodeResourceAvailableMetricsName,
+		Help: "The node resource allocatable for the node"}, resourceMetricsLabelKey)
+	nodeResourceUsageGV := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: values.NodeResourceUsageMetricsName,
+		Help: "The node resource usage for the node"}, resourceMetricsLabelKey)
 
 	prometheus.MustRegister(nodeCPUCoreHourlyCostGV,
-		nodeRAMGBHourlyCostGV, nodeResourceHourlyCostGV, nodeResourceUsageGV, nodeTotalCostGV, nodeResourceTotalGV,
-		nodeResourceAllocatableGV, nodeResourceCapacityGV)
-	return &NodeLevelMetricsCollector{
+		nodeRAMGBHourlyCostGV, nodeResourceHourlyCostGV, nodeResourceUsageGV,
+		nodeTotalCostGV, nodeResourceTotalGV, nodeResourceSystemTakenGV, nodeResourceAvailableGV)
+
+	nodeMetricsCollector := &NodeLevelMetricsCollector{
 		metricsClient:                 client,
 		provider:                      provider,
-		nodeLister:                    lister,
+		nodeLister:                    coreResourceInformerLister.NodeLister,
+		nodeResouece:                  make(map[string]nodeResourceInfo),
 		nodeCPUCoreCostGV:             nodeCPUCoreHourlyCostGV,
 		nodeRAMGBCostGV:               nodeRAMGBHourlyCostGV,
 		nodeResourceHourlyTotalCostGV: nodeResourceHourlyCostGV,
 		nodeTotalCostGV:               nodeTotalCostGV,
+		nodeResourceTotalGV:           nodeResourceTotalGV,
+		nodeResourceSystemTakenGV:     nodeResourceSystemTakenGV,
+		nodeResourceAvailableGV:       nodeResourceAvailableGV,
 		nodeResourceUsageGV:           nodeResourceUsageGV,
-		nodeResourceAllocatableGV:     nodeResourceAllocatableGV,
-		nodeResourceCapacityGV:        nodeResourceCapacityGV,
-		nodeResourceTotalGV:           nodeResourceTotalGV}
+	}
+	nodeMetricsCollector.registerNodeResourceEventHandler(coreResourceInformerLister)
+
+	return nodeMetricsCollector
+}
+
+func (n *NodeLevelMetricsCollector) registerNodeResourceEventHandler(coreResourceInformerLister *api.CoreResourceInformerLister) {
+	coreResourceInformerLister.NodeInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			node, ok := obj.(*corev1.Node)
+			if !ok {
+				return
+			}
+			n.handleNodeAddition(node)
+		},
+		DeleteFunc: func(obj interface{}) {
+			node, ok := obj.(*corev1.Node)
+			if !ok {
+				return
+			}
+			n.handleNodeDeletion(node)
+		},
+	})
+
+	coreResourceInformerLister.PodInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			pod, ok := obj.(*corev1.Pod)
+			if !ok {
+				return
+			}
+			n.handlePodAddition(pod)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			newPod, ok := newObj.(*corev1.Pod)
+			if !ok {
+				return
+			}
+			oldPod, ok := oldObj.(*corev1.Pod)
+			if !ok {
+				return
+			}
+			n.handlePodUpdate(oldPod, newPod)
+		},
+		DeleteFunc: func(obj interface{}) {
+			pod, ok := obj.(*corev1.Pod)
+			if !ok {
+				return
+			}
+			n.handlePodDeletion(pod)
+		},
+	})
+}
+
+func (n *NodeLevelMetricsCollector) handleNodeAddition(node *corev1.Node) {
+	if _, ok := n.nodeResouece[node.Name]; !ok {
+		n.mutex.Lock()
+		defer n.mutex.Unlock()
+		n.nodeResouece[node.Name] = nodeResourceInfo{
+			allocatableResource: corev1.ResourceList{},
+			requestedResource:   corev1.ResourceList{},
+		}
+
+		for resourceName, resourceValue := range node.Status.Allocatable {
+			n.nodeResouece[node.Name].allocatableResource[resourceName] = resourceValue
+		}
+	}
+}
+
+func (n *NodeLevelMetricsCollector) handleNodeDeletion(node *corev1.Node) {
+	if _, ok := n.nodeResouece[node.Name]; !ok {
+		n.mutex.Lock()
+		defer n.mutex.Unlock()
+		delete(n.nodeResouece, node.Name)
+	}
+}
+
+func (n *NodeLevelMetricsCollector) addPodResourceRequested(pod *corev1.Pod) {
+	for _, container := range pod.Spec.Containers {
+		for resourceName, resourceValue := range container.Resources.Requests {
+			requested, ok := n.nodeResouece[pod.Spec.NodeName].requestedResource[resourceName]
+			if !ok {
+				requested = resource.Quantity{}
+			}
+			requested.Add(resourceValue)
+			n.nodeResouece[pod.Spec.NodeName].requestedResource[resourceName] = requested
+		}
+	}
+}
+
+func (n *NodeLevelMetricsCollector) handlePodAddition(pod *corev1.Pod) {
+	if pod.Spec.NodeName != "" {
+		n.mutex.Lock()
+		defer n.mutex.Unlock()
+
+		if _, ok := n.nodeResouece[pod.Spec.NodeName]; !ok {
+			klog.Warningf("Node %s not found in cluster", pod.Spec.NodeName)
+		}
+		n.addPodResourceRequested(pod)
+	}
+}
+
+func (n *NodeLevelMetricsCollector) handlePodUpdate(oldPod, newPod *corev1.Pod) {
+	if oldPod.Spec.NodeName == "" && newPod.Spec.NodeName != "" {
+		n.mutex.Lock()
+		defer n.mutex.Unlock()
+
+		if _, ok := n.nodeResouece[newPod.Spec.NodeName]; !ok {
+			klog.Warningf("Node %s not found in cluster", newPod.Spec.NodeName)
+		}
+		n.addPodResourceRequested(newPod)
+	}
+}
+
+func (n *NodeLevelMetricsCollector) deletePodResourceRequested(pod *corev1.Pod) {
+	for _, container := range pod.Spec.Containers {
+		for resourceName, resourceValue := range container.Resources.Requests {
+			requested, ok := n.nodeResouece[pod.Spec.NodeName].requestedResource[resourceName]
+			if !ok {
+				continue
+			}
+			requested.Sub(resourceValue)
+			n.nodeResouece[pod.Spec.NodeName].requestedResource[resourceName] = requested
+		}
+	}
+}
+
+func (n *NodeLevelMetricsCollector) handlePodDeletion(pod *corev1.Pod) {
+	if pod.Spec.NodeName != "" {
+		n.mutex.Lock()
+		defer n.mutex.Unlock()
+
+		n.deletePodResourceRequested(pod)
+	}
 }
 
 func (n *NodeLevelMetricsCollector) StartCollectNodeLevelMetrics(ctx context.Context,
@@ -174,7 +322,7 @@ func (n *NodeLevelMetricsCollector) collectNodeCost(agentOptions *options.AgentO
 		metricsLabelValues[values.ResourceTypeLabelKey] = string(corev1.ResourceCPU)
 		n.nodeResourceHourlyTotalCostGV.With(metricsLabelValues).Set(nodeCostInfo.CPUCoreHourlyPrice * nodeCostInfo.CPUCore)
 		metricsLabelValues[values.ResourceTypeLabelKey] = string(corev1.ResourceMemory)
-		n.nodeResourceHourlyTotalCostGV.With(metricsLabelValues).Set(nodeCostInfo.RAMGBHourlyPrice * nodeCostInfo.RamGB)
+		n.nodeResourceHourlyTotalCostGV.With(metricsLabelValues).Set(nodeCostInfo.RAMGBHourlyPrice * nodeCostInfo.RamGiB)
 	}
 }
 
@@ -225,17 +373,39 @@ func (n *NodeLevelMetricsCollector) collectNodeResourceMetrics(agentOptions *opt
 			values.BillingModeLabelKey: nodeCostInfo.BillingMode,
 		}
 
-		cpuCapaticy, memoryCapacity := utils.ParseResourceList(node.Status.Capacity)
-		cpuAllocatable, memoryAllocatable := utils.ParseResourceList(node.Status.Allocatable)
 		metricsLabels[values.ResourceTypeLabelKey] = string(corev1.ResourceCPU)
 		n.nodeResourceTotalGV.With(metricsLabels).Set(nodeCostInfo.CPUCore)
-		n.nodeResourceCapacityGV.With(metricsLabels).Set(cpuCapaticy)
-		n.nodeResourceAllocatableGV.With(metricsLabels).Set(cpuAllocatable)
+
+		n.mutex.Lock()
+		if _, ok := n.nodeResouece[node.Name]; ok {
+			allocatable := n.nodeResouece[node.Name].allocatableResource[corev1.ResourceCPU]
+			requested := n.nodeResouece[node.Name].requestedResource[corev1.ResourceCPU]
+
+			resourceSystemTaken := nodeCostInfo.CPUCore - utils.ConvertQualityToCore(allocatable)
+			allocatable.Sub(requested)
+			resoruceAvailable := utils.ConvertQualityToCore(allocatable)
+
+			n.nodeResourceSystemTakenGV.With(metricsLabels).Set(resourceSystemTaken)
+			n.nodeResourceAvailableGV.With(metricsLabels).Set(resoruceAvailable)
+		}
+		n.mutex.Unlock()
 
 		metricsLabels[values.ResourceTypeLabelKey] = string(corev1.ResourceMemory)
-		n.nodeResourceTotalGV.With(metricsLabels).Set(nodeCostInfo.RamGB)
-		n.nodeResourceCapacityGV.With(metricsLabels).Set(memoryCapacity)
-		n.nodeResourceAllocatableGV.With(metricsLabels).Set(memoryAllocatable)
+		n.nodeResourceTotalGV.With(metricsLabels).Set(nodeCostInfo.RamGiB)
+
+		n.mutex.Lock()
+		if _, ok := n.nodeResouece[node.Name]; ok {
+			allocatable := n.nodeResouece[node.Name].allocatableResource[corev1.ResourceMemory]
+			requested := n.nodeResouece[node.Name].requestedResource[corev1.ResourceMemory]
+
+			resourceSystemTaken := nodeCostInfo.RamGiB - utils.ConvertQualityToGiB(allocatable)
+			allocatable.Sub(requested)
+			resoruceAvailable := utils.ConvertQualityToGiB(allocatable)
+
+			n.nodeResourceSystemTakenGV.With(metricsLabels).Set(resourceSystemTaken)
+			n.nodeResourceAvailableGV.With(metricsLabels).Set(resoruceAvailable)
+		}
+		n.mutex.Unlock()
 	}
 }
 

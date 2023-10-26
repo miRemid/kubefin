@@ -122,6 +122,23 @@ export function CustomAppLayout(props) {
   );
 }
 
+export function ParseArrayIntoTimeSeriesData(arrayData) {
+  var timeSeriesData = [];
+
+  if (arrayData !== undefined) {
+    arrayData.map(function (item) {
+      const data = {
+        x: new Date(item[0] * 1000),
+        y: Number(item[1]),
+      };
+      timeSeriesData.push(data);
+      return timeSeriesData;
+    })
+  }
+
+  return timeSeriesData;
+}
+
 export const CounterLink = ({ children }) => {
   return (
     <Link variant="awsui-value-large" href="#">

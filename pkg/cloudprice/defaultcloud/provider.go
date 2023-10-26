@@ -37,11 +37,11 @@ const (
 )
 
 type DefaultCloudProvider struct {
-	client             kubernetes.Interface
-	CpuCoreHourlyPrice float64
-	RamGBHourlyPrice   float64
-	CPUCoreReserved    string
-	RAMGBReserved      string
+	client               kubernetes.Interface
+	CpuCoreHourlyPrice   float64
+	RamGBHourlyPrice     float64
+	NodeCPUCoreDeviation string
+	NodeRAMGBDeviation   string
 }
 
 func NewDefaultCloudProvider(client kubernetes.Interface, agentOptions *options.AgentOptions) (*DefaultCloudProvider, error) {
@@ -67,11 +67,11 @@ func NewDefaultCloudProvider(client kubernetes.Interface, agentOptions *options.
 	}
 
 	defaultCloud := DefaultCloudProvider{
-		client:             client,
-		CpuCoreHourlyPrice: cpuCoreHourlyPrice,
-		RamGBHourlyPrice:   ramGBHourlyPrice,
-		CPUCoreReserved:    agentOptions.CPUCoreReserved,
-		RAMGBReserved:      agentOptions.RAMGBReserved,
+		client:               client,
+		CpuCoreHourlyPrice:   cpuCoreHourlyPrice,
+		RamGBHourlyPrice:     ramGBHourlyPrice,
+		NodeCPUCoreDeviation: agentOptions.NodeCPUCoreDeviation,
+		NodeRAMGBDeviation:   agentOptions.NodeRAMGBDeviation,
 	}
 
 	return &defaultCloud, nil
@@ -103,29 +103,29 @@ func (c *DefaultCloudProvider) GetNodeHourlyPrice(node *v1.Node) (*api.InstanceP
 
 	// we can't get real cpu/ram from node.status, take env and add it
 	var err error
-	CPUCoreReserved := 0.0
-	if c.CPUCoreReserved != "" {
-		CPUCoreReserved, err = strconv.ParseFloat(c.CPUCoreReserved, 64)
+	CPUCoreDeviation := 0.0
+	if c.NodeCPUCoreDeviation != "" {
+		CPUCoreDeviation, err = strconv.ParseFloat(c.NodeCPUCoreDeviation, 64)
 		if err != nil {
-			klog.Errorf("Parse %s error:%v", c.CPUCoreReserved, err)
+			klog.Errorf("Parse %s error:%v", c.NodeCPUCoreDeviation, err)
 			return nil, err
 		}
 	}
 
-	RAMGBReserved := 0.0
-	if c.RAMGBReserved != "" {
-		RAMGBReserved, err = strconv.ParseFloat(c.RAMGBReserved, 64)
+	RAMGBDeviation := 0.0
+	if c.NodeRAMGBDeviation != "" {
+		RAMGBDeviation, err = strconv.ParseFloat(c.NodeRAMGBDeviation, 64)
 		if err != nil {
-			klog.Errorf("Parse %s error:%v", c.RAMGBReserved, err)
+			klog.Errorf("Parse %s error:%v", c.NodeRAMGBDeviation, err)
 			return nil, err
 		}
 	}
 
 	return &api.InstancePriceInfo{
 		NodeTotalHourlyPrice: c.CpuCoreHourlyPrice*cpuCores + c.RamGBHourlyPrice*(ramBytes/values.GBInBytes),
-		CPUCore:              cpuCores + CPUCoreReserved,
+		CPUCore:              cpuCores + CPUCoreDeviation,
 		CPUCoreHourlyPrice:   c.CpuCoreHourlyPrice,
-		RamGB:                (ramBytes / values.GBInBytes) + RAMGBReserved,
+		RamGiB:               (ramBytes / values.GBInBytes) + RAMGBDeviation,
 		RAMGBHourlyPrice:     c.RamGBHourlyPrice,
 		InstanceType:         "default_instance_type",
 		BillingMode:          values.BillingModeOnDemand,

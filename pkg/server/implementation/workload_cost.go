@@ -182,7 +182,7 @@ func parsePodResourceRequest(podWorkloadCost map[string]map[int64]*api.ClusterWo
 					PodCount: 1,
 				}
 			}
-			item[timeStamp].RAMGBRequest = v / float64(stepSeconds) * values.HourInSeconds
+			item[timeStamp].RAMGiBRequest = v / float64(stepSeconds) * values.HourInSeconds
 		}
 	}
 }
@@ -219,7 +219,7 @@ func parsePodResourceUsage(podWorkloadCost map[string]map[int64]*api.ClusterWork
 					PodCount: 1,
 				}
 			}
-			item[timeStamp].RAMGBUsage = v / float64(stepSeconds) * values.HourInSeconds
+			item[timeStamp].RAMGiBUsage = v / float64(stepSeconds) * values.HourInSeconds
 		}
 	}
 }
@@ -414,7 +414,7 @@ func parseHighLevelWorkloadResourceRequest(workloadCost map[string]map[int64]*ap
 					Timestamp: timeStamp,
 				}
 			}
-			item[timeStamp].RAMGBRequest = v / (float64(stepSeconds) / values.HourInSeconds)
+			item[timeStamp].RAMGiBRequest = v / (float64(stepSeconds) / values.HourInSeconds)
 		}
 	}
 }
@@ -448,7 +448,7 @@ func parseHighLevelWorkloadResourceUsage(workloadCost map[string]map[int64]*api.
 					Timestamp: timeStamp,
 				}
 			}
-			item[timeStamp].RAMGBUsage = v / (float64(stepSeconds) / values.HourInSeconds)
+			item[timeStamp].RAMGiBUsage = v / (float64(stepSeconds) / values.HourInSeconds)
 		}
 	}
 }
