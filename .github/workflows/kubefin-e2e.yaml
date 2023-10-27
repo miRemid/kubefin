@@ -25,21 +25,20 @@ env:
 
 jobs:
   test:
-    if: ${{ false }} # disbale for now
-    runs-on: ubuntu-20.04
+    runs-on: kubefin-e2e-env
     strategy:
       fail-fast: true
       matrix:
         k8s-version:
-          - v1.24.7
+          - v1.27.3
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go 1.19.x
+    - name: Set up Go 1.20.x
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19.x
+        go-version: 1.20.x
 
     - uses: kubefin/actions/composite/setup-ko@main
 
@@ -51,40 +50,22 @@ jobs:
       with:
         version: ${KIND_VERSION}
 
-    - name: Configure kind cluster
+    - name: Launch KubeFin with kind cluster
       run: |
         set -x
 
         export K8S_VERSION=${{ matrix.k8s-version }}
-        hack/local-up-kubefin.sh
+        hack/local-start-kubefin.sh
 
-    - name: Export KubeFin API
-      run: |
-        set -x
-
-        # wait 60 seconds to collect some metrics
-        sleep 60
-        kubectl port-forward -nkubefin svc/kubefin-cost-analyzer-service 8080:8080 --kubeconfig="${HOME}"/.kube/kubefin-server.config &
-
-    - name: E2E Test
-      run: |
-        set -x
-
-        gotestsum --format testname -- \
-          -race -count=1 -parallel=1 -tags=e2e -v \
-          -timeout=30m \
-          -short \
-          ./test/e2e
-
-    - name: Check resource
-      # Only upload logs on failure.
+    - name: Set kubeconfig path
       if: ${{ failure() }}
       run: |
-        set -x
+        kind export kubeconfig --name kubefin-server
 
-        # checkout pods in primary cluster
-        kubectl get pods -A --kubeconfig="${HOME}"/.kube/kubefin-server.config
-        kubectl describe pod -A --kubeconfig="${HOME}"/.kube/kubefin-server.config
-        # checkout pods in secondary cluster
-        kubectl get pods -A --kubeconfig="${HOME}"/.kube/cluster-1.config
-        kubectl describe pod -A --kubeconfig="${HOME}"/.kube/cluster-1.config
+    - uses: chainguard-dev/actions/kind-diag@main
+      # Only upload logs on failure.
+      if: ${{ failure() }}
+      with:
+        cluster-resources: nodes,namespaces
+        namespace-resources: pods,svc,deployment,statefulset
+        artifact-name: logs-${{ matrix.k8s-version}}
