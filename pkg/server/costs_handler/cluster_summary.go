@@ -55,7 +55,6 @@ func ClustersCostsSummaryHandler(ctx *gin.Context) {
 		return
 	}
 	summaries := implementation.ConvertToMultiClustersCostsList(allClustersSummary, allClustersProperty)
-	klog.Infof("%v", summaries.Items[0])
 	bodyBytes, err := json.Marshal(summaries)
 	if err != nil {
 		utils.ForwardStatusError(ctx, http.StatusInternalServerError,

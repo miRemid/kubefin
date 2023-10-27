@@ -110,18 +110,20 @@ export function AllClustersDashboard() {
         );
         // cpu and memory overview
         const CPUCoresItems = metricsSummary.map((item) => item.cpuCoreTotal);
+        const CPUSystemReservedItems = metricsSummary.map((item) => item.cpuCoreSystemTaken);
         const requestedCPUItems = metricsSummary.map(
           (item) => item.cpuCoreRequest
         );
         const availableCPUItems = metricsSummary.map(
-          (item) => item.cpuCoreCapacity
+          (item) => item.cpuCoreAvailable
         );
-        const MemoryItems = metricsSummary.map((item) => item.ramGBTotal);
+        const MemoryItems = metricsSummary.map((item) => item.ramGiBTotal);
+        const MemorySystemReservedItems = metricsSummary.map((item) => item.ramGiBSystemTaken);
         const requestedMemoryItems = metricsSummary.map(
-          (item) => item.ramGBRequest
+          (item) => item.ramGiBRequest
         );
         const availableMemoryItems = metricsSummary.map(
-          (item) => item.ramGBCapacity
+          (item) => item.ramGiBAvailable
         );
         const totalCost = costItems.reduce(function (result, item) {
           return result + item;
@@ -129,70 +131,52 @@ export function AllClustersDashboard() {
         const totalNodes = nodesItems.reduce(function (result, item) {
           return result + item;
         }, 0);
-        const totalOndemandNodes = ondemandNodesItems.reduce(function (
-          result,
-          item
-        ) {
+        const totalOndemandNodes = ondemandNodesItems.reduce(function (result,item) {
           return result + item;
-        },
-        0);
+        }, 0);
         const totalSpotNodes = spotNodesItems.reduce(function (result, item) {
           return result + item;
         }, 0);
-        const totalFallbackNodes = fallbackNodes.reduce(function (
-          result,
-          item
-        ) {
+        const totalFallbackNodes = fallbackNodes.reduce(function (result, item) {
           return result + item;
-        },
-        0);
+        }, 0);
         const totalCPUCores = CPUCoresItems.reduce(function (result, item) {
           return result + item;
         }, 0);
-        const totalRequestedCPU = requestedCPUItems.reduce(function (
-          result,
-          item
-        ) {
+        const totalCPUSystemReserved = CPUSystemReservedItems.reduce(function (result, item) {
           return result + item;
-        },
-        0);
-        const totalAvailableCPU = availableCPUItems.reduce(function (
-          result,
-          item
-        ) {
+        }, 0);
+        const totalRequestedCPU = requestedCPUItems.reduce(function (result, item) {
           return result + item;
-        },
-        0);
+        }, 0);
+        const totalAvailableCPU = availableCPUItems.reduce(function (result, item) {
+          return result + item;
+        }, 0);
         const totalMemory = MemoryItems.reduce(function (result, item) {
           return result + item;
         }, 0);
-        const totalRequestedMemory = requestedMemoryItems.reduce(function (
-          result,
-          item
-        ) {
+        const totalMemorySystemReserved = MemorySystemReservedItems.reduce(function (result, item) {
           return result + item;
-        },
-        0);
-        const totalAvailableMemory = availableMemoryItems.reduce(function (
-          result,
-          item
-        ) {
+        }, 0);
+        const totalRequestedMemory = requestedMemoryItems.reduce(function (result, item) {
           return result + item;
-        },
-        0);
+        }, 0);
+        const totalAvailableMemory = availableMemoryItems.reduce(function (result, item) {
+          return result + item;
+        }, 0);
         setTotalCost(totalCost);
         setTotalNodes(totalNodes);
         setTotalOndemandNodes(totalOndemandNodes);
         setTotalSpotNodes(totalSpotNodes);
         setTotalFallbackNodes(totalFallbackNodes);
         setTotalCPUCores(totalCPUCores);
-        setSystemReservedCPU(totalCPUCores - totalAvailableCPU);
+        setSystemReservedCPU(totalCPUSystemReserved);
         setWorkloadReservedCPU(totalRequestedCPU);
-        setAllocatableCPU(totalAvailableCPU - totalRequestedCPU);
+        setAllocatableCPU(totalAvailableCPU);
         setTotalMemory(totalMemory);
-        setSystemReservedMemory(totalMemory - totalAvailableMemory);
+        setSystemReservedMemory(totalMemorySystemReserved);
         setWorkloadReservedMemory(totalRequestedMemory);
-        setAllocatableMemory(totalAvailableMemory - totalRequestedMemory);
+        setAllocatableMemory(totalAvailableMemory);
         setCostSummary(costSummary);
         setMetricsSummary(metricsSummary);
       })

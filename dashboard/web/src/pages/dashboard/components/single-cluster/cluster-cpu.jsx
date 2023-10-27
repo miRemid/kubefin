@@ -44,12 +44,12 @@ export default function ClusterCPU(props) {
           <CounterLink>{cluster.CPU.requestedCPU}</CounterLink>
         </div>
         <div>
-          <Box variant="awsui-key-label">CPU allocatable</Box>
-          <CounterLink>{cluster.CPU.allocatableCPU}</CounterLink>
+          <Box variant="awsui-key-label">CPU available</Box>
+          <CounterLink>{cluster.CPU.availableCPU}</CounterLink>
         </div>
         <div>
           <Box variant="awsui-key-label">CPU utilization</Box>
-          <CounterLink>{keepTwoDecimal(cluster.CPU.CPUusage/cluster.CPU.totalCPUCores*100)}%</CounterLink>
+          <CounterLink>{keepTwoDecimal(cluster.CPU.requestedCPU/cluster.CPU.totalCPUCores*100)}%</CounterLink>
         </div>
       </ColumnLayout>
     </Container>

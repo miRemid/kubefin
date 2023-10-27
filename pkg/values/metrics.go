@@ -21,17 +21,18 @@ var (
 	ClusterActiveMetricsName = "kubefin_cluster_active"
 
 	// Node level metrics name
-	NodeCPUCoreHourlyCostMetricsName   = "kubefin_node_cpu_core_hourly_cost"
-	NodeCPUHourlyCostMetricsName       = "kubefin_node_cpu_hourly_cost"
-	NodeRAMGBHourlyCostMetricsName     = "kubefin_node_ram_gb_hourly_cost"
-	NodeResourceHourlyCostMetricsName  = "kubefin_node_resource_hourly_cost"
-	NodeRAMHourlyCostMetricsName       = "kubefin_node_ram_hourly_cost"
-	NodeTotalHourlyCostMetricsName     = "kubefin_node_total_hourly_cost"
-	NodeResourceUsageMetricsName       = "kubefin_node_resource_usage"
-	NodeResourceAllocatableMetricsName = "kubefin_node_resource_allocatable"
-	NodeResourceCapacityMetricsName    = "kubefin_node_resource_capacity"
+	NodeCPUCoreHourlyCostMetricsName  = "kubefin_node_cpu_core_hourly_cost"
+	NodeCPUHourlyCostMetricsName      = "kubefin_node_cpu_hourly_cost"
+	NodeRAMGBHourlyCostMetricsName    = "kubefin_node_ram_gb_hourly_cost"
+	NodeResourceHourlyCostMetricsName = "kubefin_node_resource_hourly_cost"
+	NodeRAMHourlyCostMetricsName      = "kubefin_node_ram_hourly_cost"
+	NodeTotalHourlyCostMetricsName    = "kubefin_node_total_hourly_cost"
+
 	// NodeResourceTotalMetricsName means total resource of the node, contains the resource used by os&kubelet
-	NodeResourceTotalMetricsName = "kubefin_node_resource_total"
+	NodeResourceTotalMetricsName     = "kubefin_node_resource_total"
+	NodeResourceSystemTakenName      = "kubefin_node_resoruce_system_taken"
+	NodeResourceAvailableMetricsName = "kubefin_node_resource_available"
+	NodeResourceUsageMetricsName     = "kubefin_node_resource_usage"
 
 	// workload level metric name
 	WorkloadResourceCostMetricsName    = "kubefin_workload_resource_cost"

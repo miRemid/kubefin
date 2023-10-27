@@ -51,6 +51,7 @@ spec:
             cpu: 500m
             memory: 500Mi
         env:
+          # If configure as default, it will detect the cloud provider automatically
           - name: CLOUD_PROVIDER
             value: "{CLOUD_PROVIDER}"
           # If the name is defined, we will use this, if not we will try to get.
@@ -65,12 +66,12 @@ spec:
           # This only used when we can't recognize the cloud provider or default
           - name: CUSTOM_RAM_GB_HOUR_PRICE
             value: ""
-          # CPU core that os&kubelet consume, this only used when we can't recognize the cloud provider or default
-          - name: CPU_CORE_RESERVED
-            value: "0.1"
-          # RAM GB that os&kubelet consume, this only used when we can't recognize the cloud provider or default
-          - name: NODE_RAM_RESERVED
-            value: "0.1"
+          # the eatch node CPU deviation core between the actual core and the one obtained from node.status.capacity, this only used when we can't recognize the cloud provider
+          - name: NODE_CPU_DEVIATION
+            value: "0.0"
+          # the eatch node ram deviation gb between the actual core and the one obtained from node.status.capacity, this only used when we can't recognize the cloud provider
+          - name: NODE_RAM_DEVIATION
+            value: "0.4"
           # CPU core price / RAM GB price, this only used when public cloud provider
           - name: CPUCORE_RAMGB_PRICE_RATIO
             value: "3"

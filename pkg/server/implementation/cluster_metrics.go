@@ -35,9 +35,9 @@ func QueryClusterMetricsSummaryWithTimeRange(tenantId, clusterId string,
 	resourceType v1.ResourceName, start, end, stepSeconds int64) (*api.ClusterResourceMetrics, error) {
 	var usage []model.SamplePair
 	var total []model.SamplePair
-	var capacity []model.SamplePair
+	var available []model.SamplePair
 	var request []model.SamplePair
-	var allocatable []model.SamplePair
+	var systemTaken []model.SamplePair
 
 	var wg sync.WaitGroup
 	var err error
@@ -51,12 +51,12 @@ func QueryClusterMetricsSummaryWithTimeRange(tenantId, clusterId string,
 	}()
 	go func() {
 		defer wg.Done()
-		capacity, err = queryClusterResourceCapacityWithTimeRange(tenantId, clusterId, resourceType, start, end, stepSeconds)
+		available, err = queryClusterResourceAvailableWithTimeRange(tenantId, clusterId, resourceType, start, end, stepSeconds)
 		errs = append(errs, err)
 	}()
 	go func() {
 		defer wg.Done()
-		allocatable, err = queryClusterResourceAllocatableWithTimeRange(tenantId, clusterId, resourceType, start, end, stepSeconds)
+		systemTaken, err = queryClusterResourceSystemTakenWithTimeRange(tenantId, clusterId, resourceType, start, end, stepSeconds)
 		errs = append(errs, err)
 	}()
 	go func() {
@@ -83,11 +83,11 @@ func QueryClusterMetricsSummaryWithTimeRange(tenantId, clusterId string,
 		ClusterId:                 clusterId,
 		ResourceType:              string(resourceType),
 		Unit:                      unit,
-		ResourceRequestValues:     request,
-		ResourceAllocatableValues: allocatable,
-		ResourceUsageValues:       usage,
-		ResourceCapacityValues:    capacity,
 		ResourceTotalValues:       total,
+		ResourceSystemTakenValues: systemTaken,
+		ResourceAvailableValues:   available,
+		ResourceRequestValues:     request,
+		ResourceUsageValues:       usage,
 	}, nil
 }
 
@@ -110,16 +110,16 @@ func queryClusterResourceTotalWithTimeRange(tenantId, clusterId string,
 	return total, nil
 }
 
-func queryClusterResourceCapacityWithTimeRange(tenantId, clusterId string, resourceType v1.ResourceName, start, end, stepSeconds int64) ([]model.SamplePair, error) {
+func queryClusterResourceAvailableWithTimeRange(tenantId, clusterId string, resourceType v1.ResourceName, start, end, stepSeconds int64) ([]model.SamplePair, error) {
 	var capacity []model.SamplePair
-	promql := fmt.Sprintf(query.QlSumNodesResourceCapacityFromCluster, clusterId, resourceType)
+	promql := fmt.Sprintf(query.QlSumNodesResourceAvailableFromCluster, clusterId, resourceType)
 	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryRangeWithStep(promql, start, end, stepSeconds)
 	if err != nil {
-		klog.Errorf("Query cluster(%s) resource capacity error:%v", clusterId, err)
+		klog.Errorf("Query cluster(%s) resource available error:%v", clusterId, err)
 		return nil, err
 	}
 	if len(ret) != 1 {
-		err := fmt.Errorf("query cluster(%s) resource capacity error, the data not correct", clusterId)
+		err := fmt.Errorf("query cluster(%s) resource available error, the data not correct", clusterId)
 		klog.Errorf("%v", err)
 		return nil, err
 	}
@@ -127,21 +127,21 @@ func queryClusterResourceCapacityWithTimeRange(tenantId, clusterId string, resou
 	return capacity, nil
 }
 
-func queryClusterResourceAllocatableWithTimeRange(tenantId, clusterId string, resourceType v1.ResourceName, start, end, stepSeconds int64) ([]model.SamplePair, error) {
-	var allocatable []model.SamplePair
-	promql := fmt.Sprintf(query.QlSumNodesResourceAllocatableFromCluster, clusterId, resourceType)
+func queryClusterResourceSystemTakenWithTimeRange(tenantId, clusterId string, resourceType v1.ResourceName, start, end, stepSeconds int64) ([]model.SamplePair, error) {
+	var systemTaken []model.SamplePair
+	promql := fmt.Sprintf(query.QlSumNodesResourceSystemTakenFromCluster, clusterId, resourceType)
 	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryRangeWithStep(promql, start, end, stepSeconds)
 	if err != nil {
-		klog.Errorf("Query cluster(%s) resource allocatable error:%v", clusterId, err)
+		klog.Errorf("Query cluster(%s) resource system takne error:%v", clusterId, err)
 		return nil, err
 	}
 	if len(ret) != 1 {
-		err := fmt.Errorf("query cluster(%s) resource allocatable error, the data not correct", clusterId)
+		err := fmt.Errorf("query cluster(%s) resource system takne error, the data not correct", clusterId)
 		klog.Errorf("%v", err)
 		return nil, err
 	}
-	allocatable = ret[0].Values
-	return allocatable, nil
+	systemTaken = ret[0].Values
+	return systemTaken, nil
 }
 
 func queryClusterResourceRequestWithTimeRange(tenantId, clusterId string, resourceType v1.ResourceName, start, end, stepSeconds int64) ([]model.SamplePair, error) {
@@ -351,13 +351,14 @@ func QueryAllClustersCurrentMetrics(tenantId string) (map[string]*api.ClusterMet
 	var resourceTotal map[string]map[string]float64
 	var resourceUsage map[string]map[string]float64
 	var resourceRequest map[string]map[string]float64
-	var resourceCapacity map[string]map[string]float64
+	var resourceAvailable map[string]map[string]float64
+	var resourceSystemTaken map[string]map[string]float64
 
 	var wg sync.WaitGroup
 	var err error
 	var errs []error
 
-	wg.Add(6)
+	wg.Add(7)
 	go func() {
 		defer wg.Done()
 		nodesNumber, err = queryAllClustersNodesNumer(tenantId)
@@ -385,7 +386,12 @@ func QueryAllClustersCurrentMetrics(tenantId string) (map[string]*api.ClusterMet
 	}()
 	go func() {
 		defer wg.Done()
-		resourceCapacity, err = queryAllClustersResourceCapacity(tenantId)
+		resourceAvailable, err = queryAllClustersResourceAvailable(tenantId)
+		errs = append(errs, err)
+	}()
+	go func() {
+		defer wg.Done()
+		resourceSystemTaken, err = queryAllClustersResourceSystemTaken(tenantId)
 		errs = append(errs, err)
 	}()
 
@@ -400,7 +406,8 @@ func QueryAllClustersCurrentMetrics(tenantId string) (map[string]*api.ClusterMet
 	parseAllClustersResourceTotal(ret, resourceTotal)
 	parseAllClustersResourceUsage(ret, resourceUsage)
 	parseAllClustersResourceRequest(ret, resourceRequest)
-	parseAllClustersResourceCapacity(ret, resourceCapacity)
+	parseAllClustersResourceAvailable(ret, resourceAvailable)
+	parseAllClustersResourceSystemTaken(ret, resourceSystemTaken)
 
 	return ret, nil
 }
@@ -469,7 +476,7 @@ func parseAllClustersResourceTotal(data map[string]*api.ClusterMetricsSummary,
 			data[clusterId] = &api.ClusterMetricsSummary{}
 		}
 		data[clusterId].CPUCoreTotal = cpuTotal
-		data[clusterId].RAMGBTotal = ramTotal
+		data[clusterId].RAMGiBTotal = ramTotal
 	}
 }
 
@@ -490,7 +497,7 @@ func parseAllClustersResourceUsage(data map[string]*api.ClusterMetricsSummary,
 			data[clusterId] = &api.ClusterMetricsSummary{}
 		}
 		data[clusterId].CPUCoreUsage = cpuUsage
-		data[clusterId].RAMGBUsage = ramUsage
+		data[clusterId].RAMGiBUsage = ramUsage
 	}
 }
 
@@ -511,28 +518,49 @@ func parseAllClustersResourceRequest(data map[string]*api.ClusterMetricsSummary,
 			data[clusterId] = &api.ClusterMetricsSummary{}
 		}
 		data[clusterId].CPUCoreRequest = cpuRequest
-		data[clusterId].RAMGBRequest = ramRequest
+		data[clusterId].RAMGiBRequest = ramRequest
 	}
 }
 
-func parseAllClustersResourceCapacity(data map[string]*api.ClusterMetricsSummary,
-	resourceCapacity map[string]map[string]float64) {
-	for clusterId, v := range resourceCapacity {
-		cpuCapacity := float64(0.0)
-		ramCapacity := float64(0.0)
+func parseAllClustersResourceAvailable(data map[string]*api.ClusterMetricsSummary,
+	resourceAvailable map[string]map[string]float64) {
+	for clusterId, v := range resourceAvailable {
+		cpuAvailable := float64(0.0)
+		ramAvailable := float64(0.0)
 		for resourceType, num := range v {
 			switch resourceType {
 			case "cpu":
-				cpuCapacity += num
+				cpuAvailable += num
 			case "memory":
-				ramCapacity += num
+				ramAvailable += num
 			}
 		}
 		if _, ok := data[clusterId]; !ok {
 			data[clusterId] = &api.ClusterMetricsSummary{}
 		}
-		data[clusterId].CPUCoreCapacity = cpuCapacity
-		data[clusterId].RAMGBCapacity = ramCapacity
+		data[clusterId].CPUCoreAvailable = cpuAvailable
+		data[clusterId].RAMGiBAvailable = ramAvailable
+	}
+}
+
+func parseAllClustersResourceSystemTaken(data map[string]*api.ClusterMetricsSummary,
+	resourceSystemTaken map[string]map[string]float64) {
+	for clusterId, v := range resourceSystemTaken {
+		cpuSystemTaken := float64(0.0)
+		ramSystemTaken := float64(0.0)
+		for resourceType, num := range v {
+			switch resourceType {
+			case "cpu":
+				cpuSystemTaken += num
+			case "memory":
+				ramSystemTaken += num
+			}
+		}
+		if _, ok := data[clusterId]; !ok {
+			data[clusterId] = &api.ClusterMetricsSummary{}
+		}
+		data[clusterId].CPUCoreSystemTaken = cpuSystemTaken
+		data[clusterId].RAMGiBSystemTaken = ramSystemTaken
 	}
 }
 
@@ -630,22 +658,40 @@ func queryAllClustersResourceRequest(tenantId string) (map[string]map[string]flo
 	return resourceRequest, nil
 }
 
-func queryAllClustersResourceCapacity(tenantId string) (map[string]map[string]float64, error) {
-	resourceCapacity := make(map[string]map[string]float64)
-	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryInstant(query.QlResourceCapacity)
+func queryAllClustersResourceAvailable(tenantId string) (map[string]map[string]float64, error) {
+	resourceAvailable := make(map[string]map[string]float64)
+	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryInstant(query.QlResourceAvailable)
 	if err != nil {
-		klog.Errorf("Query all clusters resource capacity error:%v", err)
+		klog.Errorf("Query all clusters resource available error:%v", err)
 		return nil, err
 	}
 	for _, t := range ret {
 		clusterId := t.Metric[model.LabelName(values.ClusterIdLabelKey)]
-		if _, ok := resourceCapacity[string(clusterId)]; !ok {
-			resourceCapacity[string(clusterId)] = map[string]float64{}
+		if _, ok := resourceAvailable[string(clusterId)]; !ok {
+			resourceAvailable[string(clusterId)] = map[string]float64{}
 		}
 		resourceType := t.Metric[model.LabelName(values.ResourceTypeLabelKey)]
-		resourceCapacity[string(clusterId)][string(resourceType)] = float64(t.Value)
+		resourceAvailable[string(clusterId)][string(resourceType)] = float64(t.Value)
 	}
-	return resourceCapacity, nil
+	return resourceAvailable, nil
+}
+
+func queryAllClustersResourceSystemTaken(tenantId string) (map[string]map[string]float64, error) {
+	resourceSystemTaken := make(map[string]map[string]float64)
+	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryInstant(query.QlResoruceSystemTaken)
+	if err != nil {
+		klog.Errorf("Query all clusters resource system taken error:%v", err)
+		return nil, err
+	}
+	for _, t := range ret {
+		clusterId := t.Metric[model.LabelName(values.ClusterIdLabelKey)]
+		if _, ok := resourceSystemTaken[string(clusterId)]; !ok {
+			resourceSystemTaken[string(clusterId)] = map[string]float64{}
+		}
+		resourceType := t.Metric[model.LabelName(values.ResourceTypeLabelKey)]
+		resourceSystemTaken[string(clusterId)][string(resourceType)] = float64(t.Value)
+	}
+	return resourceSystemTaken, nil
 }
 
 func ConvertToMultiClustersMetricsList(clusterMetrics map[string]*api.ClusterMetricsSummary, clustersProperty map[string]*api.ClusterBasicProperty) *api.ClusterMetricsSummaryList {
@@ -667,13 +713,14 @@ func QueryClusterCurrentMetrics(tenantId, clusterId string) (*api.ClusterMetrics
 	var resourceTotal map[string]float64
 	var resourceUsage map[string]float64
 	var resourceRequest map[string]float64
-	var resourceCapacity map[string]float64
+	var resourceAvailable map[string]float64
+	var resourceSystemTaken map[string]float64
 
 	var wg sync.WaitGroup
 	var err error
 	var errs []error
 
-	wg.Add(6)
+	wg.Add(7)
 	go func() {
 		defer wg.Done()
 		nodesNumber, err = queryClusterNodesNumber(tenantId, clusterId)
@@ -701,7 +748,12 @@ func QueryClusterCurrentMetrics(tenantId, clusterId string) (*api.ClusterMetrics
 	}()
 	go func() {
 		defer wg.Done()
-		resourceCapacity, err = queryClusterResourceCapacity(tenantId, clusterId)
+		resourceAvailable, err = queryClusterResourceAvailable(tenantId, clusterId)
+		errs = append(errs, err)
+	}()
+	go func() {
+		defer wg.Done()
+		resourceSystemTaken, err = queryClusterResourceSystemTaken(tenantId, clusterId)
 		errs = append(errs, err)
 	}()
 
@@ -715,7 +767,8 @@ func QueryClusterCurrentMetrics(tenantId, clusterId string) (*api.ClusterMetrics
 	parseClusterResourceTotal(ret, resourceTotal)
 	parseClusterResourceUsage(ret, resourceUsage)
 	parseClusterResourceRequest(ret, resourceRequest)
-	parseClusterResourceCapacity(ret, resourceCapacity)
+	parseClusterResourceAvailable(ret, resourceAvailable)
+	parseClusterResourceSystemTaken(ret, resourceSystemTaken)
 
 	return ret, nil
 }
@@ -750,7 +803,7 @@ func parseClusterResourceTotal(data *api.ClusterMetricsSummary, resourceTotal ma
 		case "cpu":
 			data.CPUCoreTotal += num
 		case "memory":
-			data.RAMGBTotal += num
+			data.RAMGiBTotal += num
 		}
 	}
 }
@@ -761,7 +814,7 @@ func parseClusterResourceUsage(data *api.ClusterMetricsSummary, resourceUsage ma
 		case "cpu":
 			data.CPUCoreUsage += num
 		case "memory":
-			data.RAMGBUsage += num
+			data.RAMGiBUsage += num
 		}
 	}
 }
@@ -772,18 +825,29 @@ func parseClusterResourceRequest(data *api.ClusterMetricsSummary, resourceReques
 		case "cpu":
 			data.CPUCoreRequest += num
 		case "memory":
-			data.RAMGBRequest += num
+			data.RAMGiBRequest += num
 		}
 	}
 }
 
-func parseClusterResourceCapacity(data *api.ClusterMetricsSummary, resourceCapacity map[string]float64) {
-	for resourceType, num := range resourceCapacity {
+func parseClusterResourceAvailable(data *api.ClusterMetricsSummary, resourceAvailable map[string]float64) {
+	for resourceType, num := range resourceAvailable {
 		switch resourceType {
 		case "cpu":
-			data.CPUCoreCapacity += num
+			data.CPUCoreAvailable += num
 		case "memory":
-			data.RAMGBCapacity += num
+			data.RAMGiBAvailable += num
+		}
+	}
+}
+
+func parseClusterResourceSystemTaken(data *api.ClusterMetricsSummary, resourceSystemTaken map[string]float64) {
+	for resourceType, num := range resourceSystemTaken {
+		switch resourceType {
+		case "cpu":
+			data.CPUCoreSystemTaken += num
+		case "memory":
+			data.RAMGiBSystemTaken += num
 		}
 	}
 }
@@ -868,17 +932,34 @@ func queryClusterResoruceRequest(tenantId, clusterId string) (map[string]float64
 	return resourceRequest, nil
 }
 
-func queryClusterResourceCapacity(tenantId, clusterId string) (map[string]float64, error) {
+func queryClusterResourceAvailable(tenantId, clusterId string) (map[string]float64, error) {
 	// maps [cpu/memory]float64
-	resourceCapacity := make(map[string]float64)
-	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryInstant(query.QlResourceCapacity)
+	resourceAvailale := make(map[string]float64)
+	promql := fmt.Sprintf(query.QlResourceAvailableFromCluster, clusterId)
+	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryInstant(promql)
 	if err != nil {
 		klog.Errorf("Query cluster(%s) resource capacity error:%v", clusterId, err)
 		return nil, err
 	}
 	for _, t := range ret {
 		resourceType := t.Metric[model.LabelName(values.ResourceTypeLabelKey)]
-		resourceCapacity[string(resourceType)] = float64(t.Value)
+		resourceAvailale[string(resourceType)] = float64(t.Value)
 	}
-	return resourceCapacity, nil
+	return resourceAvailale, nil
+}
+
+func queryClusterResourceSystemTaken(tenantId, clusterId string) (map[string]float64, error) {
+	// maps [cpu/memory]float64
+	resourceSystemTaken := make(map[string]float64)
+	promql := fmt.Sprintf(query.QlResourceSystemTakenFromCluster, clusterId)
+	ret, err := query.GetPromQueryClient().WithTenantId(tenantId).QueryInstant(promql)
+	if err != nil {
+		klog.Errorf("Query cluster(%s) resource capacity error:%v", clusterId, err)
+		return nil, err
+	}
+	for _, t := range ret {
+		resourceType := t.Metric[model.LabelName(values.ResourceTypeLabelKey)]
+		resourceSystemTaken[string(resourceType)] = float64(t.Value)
+	}
+	return resourceSystemTaken, nil
 }

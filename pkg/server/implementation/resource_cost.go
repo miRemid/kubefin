@@ -183,7 +183,7 @@ func parseResourceRAMTotalHour(clusterResourceCost map[int64]*api.ClusterResourc
 				Timestamp: timeStamp,
 			}
 		}
-		cost.RAMGBCount = v / float64(stepSeconds) * values.HourInSeconds
+		cost.RAMGiBCount = v / float64(stepSeconds) * values.HourInSeconds
 		clusterResourceCost[timeStamp] = cost
 	}
 }
@@ -209,7 +209,7 @@ func parseResourceRAMUsageHour(clusterResourceCost map[int64]*api.ClusterResourc
 				Timestamp: timeStamp,
 			}
 		}
-		cost.RAMGBUsage = v / float64(stepSeconds) * values.HourInSeconds
+		cost.RAMGiBUsage = v / float64(stepSeconds) * values.HourInSeconds
 		clusterResourceCost[timeStamp] = cost
 	}
 }

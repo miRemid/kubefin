@@ -27,7 +27,7 @@ func ValidateAllClustersMetricsSummary(clustersSummary *api.ClusterMetricsSummar
 		clustersSummary.Items[0].PodTotalCurrent != 0 &&
 		clustersSummary.Items[0].PodScheduledCurrent != 0 &&
 		clustersSummary.Items[0].CPUCoreTotal != 0 &&
-		clustersSummary.Items[0].RAMGBTotal != 0 {
+		clustersSummary.Items[0].RAMGiBTotal != 0 {
 		return true
 	}
 
@@ -40,7 +40,7 @@ func ValidateSpecificClusterMetricsSummary(clusterSummary *api.ClusterMetricsSum
 		clusterSummary.PodTotalCurrent != 0 &&
 		clusterSummary.PodScheduledCurrent != 0 &&
 		clusterSummary.CPUCoreTotal != 0 &&
-		clusterSummary.RAMGBTotal != 0 {
+		clusterSummary.RAMGiBTotal != 0 {
 		return true
 	}
 
@@ -52,7 +52,7 @@ func ValidateSpecificClusterResourceMetrics(metrics *api.ClusterResourceMetrics)
 		len(metrics.ResourceTotalValues) != 0 &&
 		len(metrics.ResourceUsageValues) != 0 &&
 		len(metrics.ResourceRequestValues) != 0 &&
-		len(metrics.ResourceCapacityValues) != 0 {
+		len(metrics.ResourceSystemTakenValues) != 0 {
 		return true
 	}
 	return false

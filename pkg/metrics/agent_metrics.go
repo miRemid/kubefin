@@ -48,7 +48,7 @@ func NewAgentMetricsCollector(ctx context.Context,
 		agentOptions:              options,
 		interval:                  options.ScrapMetricsInterval,
 		clusterMetricsCollector:   core.NewClusterLevelMetricsCollector(provider, coreResourceInformerLister.NodeLister),
-		nodeLevelMetricsCollector: core.NewNodeLevelMetricsCollector(metricsClientSet, provider, coreResourceInformerLister.NodeLister),
+		nodeLevelMetricsCollector: core.NewNodeLevelMetricsCollector(metricsClientSet, provider, coreResourceInformerLister),
 		podLevelMetricsCollector: core.NewPodLevelMetricsCollector(
 			metricsClientSet, provider,
 			coreResourceInformerLister.PodLister,

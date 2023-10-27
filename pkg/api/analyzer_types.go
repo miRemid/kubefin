@@ -108,11 +108,11 @@ type ClusterResourceCost struct {
 	CPUCoreUsage float64 `json:"cpuCoreUsage,omitempty"`
 	CPUCost      float64 `json:"cpuCost,omitempty"`
 
-	// RAMGBCount means the average ram hour count in this period
-	RAMGBCount float64 `json:"ramGBCount,omitempty"`
-	// RAMGBUsage means the average ram hour usage in this period
-	RAMGBUsage float64 `json:"ramGBUsage,omitempty"`
-	RAMCost    float64 `json:"ramCost,omitempty"`
+	// RAMGiBCount means the average ram hour count in this period
+	RAMGiBCount float64 `json:"ramGiBCount,omitempty"`
+	// RAMGiBUsage means the average ram hour usage in this period
+	RAMGiBUsage float64 `json:"ramGiBUsage,omitempty"`
+	RAMCost     float64 `json:"ramCost,omitempty"`
 }
 
 type ClusterWorkloadCostList struct {
@@ -134,8 +134,8 @@ type ClusterWorkloadCostDetail struct {
 	PodCount       float64 `json:"podCount,omitempty"`
 	CPUCoreRequest float64 `json:"cpuCoreRequest,omitempty"`
 	CPUCoreUsage   float64 `json:"cpuCoreUsage,omitempty"`
-	RAMGBRequest   float64 `json:"ramGBRequest,omitempty"`
-	RAMGBUsage     float64 `json:"ramGBUsage,omitempty"`
+	RAMGiBRequest  float64 `json:"ramGiBRequest,omitempty"`
+	RAMGiBUsage    float64 `json:"ramGiBUsage,omitempty"`
 	TotalCost      float64 `json:"totalCost,omitempty"`
 }
 
@@ -155,8 +155,8 @@ type ClusterNamespaceCostDetail struct {
 	PodCount       float64 `json:"podCount,omitempty"`
 	CPUCoreRequest float64 `json:"cpuRequest,omitempty"`
 	CPUCoreUsage   float64 `json:"cpuCoreUsage,omitempty"`
-	RAMGBRequest   float64 `json:"ramGBRequest,omitempty"`
-	RAMGBUsage     float64 `json:"ramGBUsage,omitempty"`
+	RAMGiBRequest  float64 `json:"ramGiBRequest,omitempty"`
+	RAMGiBUsage    float64 `json:"ramGiBUsage,omitempty"`
 	TotalCost      float64 `json:"totalCost,omitempty"`
 }
 
@@ -170,33 +170,39 @@ type ClusterMetricsSummary struct {
 	PodTotalCurrent                   int64 `json:"podTotalCurrent,omitempty"`
 	PodScheduledCurrent               int64 `json:"podScheduledCurrent,omitempty"`
 	PodUnscheduledCurrent             int64 `json:"podUnscheduledCurrent,omitempty"`
+
 	// CPUCoreTotal means all nodes' cpu core
 	CPUCoreTotal float64 `json:"cpuCoreTotal,omitempty"`
+	// CPUCoreSystemTaken means the cpu taken by system
+	CPUCoreSystemTaken float64 `json:"cpuCoreSystemTaken,omitempty"`
+	// CPUCoreAvailable means all nodes' available cpu core
+	CPUCoreAvailable float64 `json:"cpuCoreAvailable,omitempty"`
 	// CPUCoreRequest means all pods' cpu core request
 	CPUCoreRequest float64 `json:"cpuCoreRequest,omitempty"`
-	// CPUCoreCapacity means all nodes' cpu core capacity
-	CPUCoreCapacity float64 `json:"cpuCoreCapacity,omitempty"`
 	// CPUCoreUsage means all pods' cpu core usage
 	CPUCoreUsage float64 `json:"cpuCoreUsage,omitempty"`
-	// RAMGBTotal means all nodes' ram gb
-	RAMGBTotal float64 `json:"ramGBTotal,omitempty"`
-	// RAMGBRequest all pods' ram gb request
-	RAMGBRequest float64 `json:"ramGBRequest,omitempty"`
-	// RAMGBCapacity means all nodes' ram gb capacity
-	RAMGBCapacity float64 `json:"ramGBCapacity,omitempty"`
-	// RAMGBUsage means all pods' ram gb usage
-	RAMGBUsage float64 `json:"ramGBUsage,omitempty"`
+
+	// RAMGiBTotal means all nodes' ram GiB
+	RAMGiBTotal float64 `json:"ramGiBTotal,omitempty"`
+	// RAMGiBSystemTaken means the rm taken by system
+	RAMGiBSystemTaken float64 `json:"ramGiBSystemTaken,omitempty"`
+	// RAMGiBAvailable means all nodes' available ram GiB
+	RAMGiBAvailable float64 `json:"ramGiBAvailable,omitempty"`
+	// RAMGiBRequest all pods' ram GiB request
+	RAMGiBRequest float64 `json:"ramGiBRequest,omitempty"`
+	// RAMGiBUsage means all pods' ram GiB usage
+	RAMGiBUsage float64 `json:"ramGiBUsage,omitempty"`
 }
 
 type ClusterResourceMetrics struct {
 	ClusterId                 string             `json:"clusterId"`
 	ResourceType              string             `json:"resourceType"`
 	Unit                      string             `json:"unit"`
-	ResourceRequestValues     []model.SamplePair `json:"resourceRequestValues"`
-	ResourceAllocatableValues []model.SamplePair `json:"resourceAllocatableValues"`
-	ResourceUsageValues       []model.SamplePair `json:"resourceUsageValues"`
-	ResourceCapacityValues    []model.SamplePair `json:"resourceCapacityValues"`
 	ResourceTotalValues       []model.SamplePair `json:"resourceTotalValues"`
+	ResourceSystemTakenValues []model.SamplePair `json:"resourceSystemTakenValues"`
+	ResourceAvailableValues   []model.SamplePair `json:"resourceAvailableValues"`
+	ResourceRequestValues     []model.SamplePair `json:"resourceRequestValues"`
+	ResourceUsageValues       []model.SamplePair `json:"resourceUsageValues"`
 }
 
 type ClusterBasicProperty struct {

@@ -83,12 +83,16 @@ export function SingleClusterDashboard() {
           const metricsSummary = data[1].data;
           const cpuInfo = data[2].data;
           const memoryInfo = data[3].data;
+
           const requestedCPUArray = cpuInfo.resourceRequestValues;
-          const allocatableCPUArray = cpuInfo.resourceAllocatableValues;
+          const availableCPUArray = cpuInfo.resourceAvailableValues;
+          const systemReservedCPUArray = cpuInfo.resourceSystemTakenValues;
           const totalCPUArray = cpuInfo.resourceTotalValues;
-          const requestedMemoryArray = memoryInfo.resourceRequestValues;
-          const allocatableMemoryArray = memoryInfo.resourceAllocatableValues;
+
           const totalMemoryArray = memoryInfo.resourceTotalValues;
+          const requestedMemoryArray = memoryInfo.resourceRequestValues;
+          const availableMemoryArray = memoryInfo.resourceAvailableValues
+          const systemReservedMemoryArray = memoryInfo.resourceSystemTakenValues;
 
           const pod = new Pod(
             metricsSummary.podTotalCurrent,
@@ -103,24 +107,24 @@ export function SingleClusterDashboard() {
             metricsSummary.fallbackBillingNodeNumbersCurrent
           );
           const memory = new Memory(
-            keepTwoDecimal(metricsSummary.ramGBTotal),
-            keepTwoDecimal(metricsSummary.ramGBRequest),
-            keepTwoDecimal(metricsSummary.ramGBCapacity) - keepTwoDecimal(metricsSummary.ramGBRequest),
-            keepTwoDecimal(metricsSummary.ramGBUsage),
+            keepTwoDecimal(metricsSummary.ramGiBTotal),
+            keepTwoDecimal(metricsSummary.ramGiBRequest),
+            keepTwoDecimal(metricsSummary.ramGiBAvailable),
+            keepTwoDecimal(metricsSummary.ramGiBUsage),
+            totalMemoryArray,
+            systemReservedMemoryArray,
             requestedMemoryArray,
-            allocatableMemoryArray,
-            totalMemoryArray
+            availableMemoryArray,
           );
           const cpu = new CPU(
             keepTwoDecimal(metricsSummary.cpuCoreTotal),
             keepTwoDecimal(metricsSummary.cpuCoreRequest),
-            keepTwoDecimal(
-              metricsSummary.cpuCoreCapacity - metricsSummary.cpuCoreRequest
-            ),
+            keepTwoDecimal(metricsSummary.cpuCoreAvailable),
             keepTwoDecimal(metricsSummary.cpuCoreUsage),
+            totalCPUArray,
+            systemReservedCPUArray,
             requestedCPUArray,
-            allocatableCPUArray,
-            totalCPUArray
+            availableCPUArray,
           );
 
           const cluster = new Cluster(

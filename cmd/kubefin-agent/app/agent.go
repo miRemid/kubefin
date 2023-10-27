@@ -94,9 +94,14 @@ func Run(ctx context.Context, opts *options.AgentOptions) error {
 	if err != nil {
 		return fmt.Errorf("create metrics client to connect kube-apiserver error:%v", err)
 	}
+	provider, err := cloudprice.NewCloudProvider(clientSet, opts)
+	if err != nil {
+		return fmt.Errorf("create cloud provider error:%v", err)
+	}
 
 	factory := informers.NewSharedInformerFactory(clientSet, 0)
 	coreResourceInformerLister := getAllCoreResourceLister(factory)
+	metricsCollector := metrics.NewAgentMetricsCollector(ctx, opts, coreResourceInformerLister, provider, metricsClientSet)
 
 	stopCh := ctx.Done()
 	factory.Start(stopCh)
@@ -109,17 +114,8 @@ func Run(ctx context.Context, opts *options.AgentOptions) error {
 		return fmt.Errorf("wait core resource cache sync failed")
 	}
 
-	provider, err := cloudprice.NewCloudProvider(clientSet, opts)
-	if err != nil {
-		return fmt.Errorf("create cloud provider error:%v", err)
-	}
 	if err := provider.ParseClusterInfo(opts); err != nil {
 		return err
-	}
-
-	metricsCollector := metrics.NewAgentMetricsCollector(ctx, opts, coreResourceInformerLister, provider, metricsClientSet)
-	runFunc := func(runCtx context.Context) {
-		metricsCollector.StartAgentMetricsCollector()
 	}
 
 	klog.Infof("Start metrics http server")
@@ -130,6 +126,9 @@ func Run(ctx context.Context, opts *options.AgentOptions) error {
 		}
 	}()
 
+	runFunc := func(runCtx context.Context) {
+		metricsCollector.StartAgentMetricsCollector()
+	}
 	if err := runLeaderElection(ctx, clientSet, opts, runFunc); err != nil {
 		return fmt.Errorf("run leader election error:%v", err)
 	}
