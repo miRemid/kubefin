@@ -1,0 +1,20 @@
+apiVersion: v2
+name: kubefin
+description: A Helm chart for Kubefin
+sources:
+  - https://github.com/kubefin/kubefin
+keywords:
+  - kubefin
+  - FinOps
+type: application
+version: 0.1.0
+appVersion: "0.1.2"
+dependencies:
+  - name: kubefin-agent
+    repository: "file://../kubefin-agent"
+    version: 0.1.0
+    condition: kubefin-agent.enabled
+  - name: kubefin-cost-analyzer
+    repository: "file://../kubefin-cost-analyzer"
+    version: 0.1.0
+    condition: kubefin-cost-analyzer.enabled

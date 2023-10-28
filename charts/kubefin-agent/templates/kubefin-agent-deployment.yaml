@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubefin-agent.fullname" . }}
+  labels:
+    {{- include "kubefin-agent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kubefin-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/kube-agent-config: {{ include (print $.Template.BasePath "/kubefin-agent-config-cm.yaml") . | sha256sum }}
+        {{- if .Values.otel.enabled }}
+        checksum/otel-collector-config: {{ include (print $.Template.BasePath "/otel-collector-config.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "kubefin-agent.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "kubefin-agent.fullname" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.extraArgs }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: LEADER_ELECTION_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - configMapRef:
+                name: {{ include "kubefin-agent.fullname" . }}
+          ports:
+            - name: metrics
+              containerPort: 8080
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.otel.enabled }}
+        - name: otel-collector
+          image: "{{ .Values.otel.image.repository }}:{{ .Values.otel.image.tag }}"
+          imagePullPolicy: {{ .Values.otel.image.pullPolicy }}
+          {{- with .Values.otel.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: otel-collector-config
+              mountPath: /etc/otelcol-contrib/config.yaml
+              subPath: config.yaml
+              readOnly: true
+      volumes:
+        - name: otel-collector-config
+          configMap:
+            name: {{ include "kubefin-agent.fullname" . }}-otel-collector-config
+      {{- end }}

@@ -1,0 +1,17 @@
+1. Get the application URL by running these commands
+{{ if and .Values.standalone .Values.ingress.enabled }}
+{{- if .Values.ingress.tls }}
+    echo "Visit https://{{ .Values.ingress.host }} to use kubefin-dashbard"
+    https://{{ .Values.ingress.host }}
+{{- else }}
+    echo "Visit http://{{ .Values.ingress.host }} to use kubefin-dashbard"
+    http://{{ .Values.ingress.host }}
+{{- end }}
+{{ else }}
+    echo "Visit http://127.0.0.1:{{ .Values.dashboard.service.port }} to use kubefin-dashbard"
+    {{- if and .Values.standalone }}
+    kubectl port-forward -n {{ .Release.Namespace }} service/{{ include "kubefin-dashboard.fullname" . }} {{ .Values.dashboard.service.port }}
+    {{- else }}
+    kubectl port-forward -n {{ .Release.Namespace }} service/{{ include "kubefin-cost-analyzer.fullname" . }} {{ .Values.dashboard.service.port }}
+    {{- end }}
+{{ end }}

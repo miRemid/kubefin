@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubefin-cost-analyzer.fullname" . }}
+  labels:
+    {{- include "kubefin-cost-analyzer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.costAnalyzer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kubefin-cost-analyzer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.costAnalyzer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "kubefin-cost-analyzer.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "kubefin-cost-analyzer.name" . }}
+          image: "{{ .Values.costAnalyzer.image.repository }}:{{ .Values.costAnalyzer.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.costAnalyzer.image.pullPolicy }}
+          {{- with .Values.costAnalyzer.extraArgs }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: QUERY_BACKEND_ENDPOINT
+              value: {{ tpl .Values.costAnalyzer.query_backend_endpoint $ | quote }}
+          ports:
+            - name: server
+              containerPort: 8080
+          {{- with .Values.costAnalyzer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- if not .Values.standalone }}
+        - name: {{ include "kubefin-dashboard.name" . }}
+          image: "{{ .Values.dashboard.image.repository }}:{{ .Values.dashboard.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dashboard.image.pullPolicy }}
+          ports:
+            - name: dashboard
+              containerPort: 80
+          {{- with .Values.dashboard.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.dashboard.Probe.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: dashboard
+            initialDelaySeconds: {{ .Values.dashboard.Probe.startupProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.dashboard.Probe.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.dashboard.Probe.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.dashboard.Probe.startupProbe.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.dashboard.Probe.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: dashboard
+            initialDelaySeconds: {{ .Values.dashboard.Probe.readinessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.dashboard.Probe.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.dashboard.Probe.readinessProbe.successThreshold }}
+            periodSeconds: {{ .Values.dashboard.Probe.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.dashboard.Probe.readinessProbe.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.dashboard.Probe.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: dashboard
+            initialDelaySeconds: {{ .Values.dashboard.Probe.livenessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.dashboard.Probe.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.dashboard.Probe.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.dashboard.Probe.livenessProbe.timeoutSeconds }}
+          {{- end }}
+      {{- end }}
+      {{- with .Values.costAnalyzer.affinity }}
+      affinity:
+        {{- tpl . $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.costAnalyzer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.costAnalyzer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,80 @@
+{{- if .Values.standalone }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubefin-dashboard.fullname" . }}
+  labels:
+    {{- include "kubefin-dashboard.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.dashboard.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kubefin-dashboard.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.dashboard.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "kubefin-dashboard.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "kubefin-dashboard.name" . }}
+          image: "{{ .Values.dashboard.image.repository }}:{{ .Values.dashboard.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dashboard.image.pullPolicy }}
+          ports:
+            - name: dashboard
+              containerPort: 80
+          {{- with .Values.dashboard.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.dashboard.Probe.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: dashboard
+            initialDelaySeconds: {{ .Values.dashboard.Probe.startupProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.dashboard.Probe.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.dashboard.Probe.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.dashboard.Probe.startupProbe.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.dashboard.Probe.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: dashboard
+            initialDelaySeconds: {{ .Values.dashboard.Probe.readinessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.dashboard.Probe.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.dashboard.Probe.readinessProbe.successThreshold }}
+            periodSeconds: {{ .Values.dashboard.Probe.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.dashboard.Probe.readinessProbe.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.dashboard.Probe.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: dashboard
+            initialDelaySeconds: {{ .Values.dashboard.Probe.livenessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.dashboard.Probe.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.dashboard.Probe.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.dashboard.Probe.livenessProbe.timeoutSeconds }}
+          {{- end }}
+      {{- with .Values.dashboard.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dashboard.affinity }}
+      affinity:
+        {{- tpl . $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dashboard.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
