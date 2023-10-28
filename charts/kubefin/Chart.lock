@@ -1,0 +1,9 @@
+dependencies:
+- name: kubefin-agent
+  repository: file://../kubefin-agent
+  version: 0.1.0
+- name: kubefin-cost-analyzer
+  repository: file://../kubefin-cost-analyzer
+  version: 0.1.0
+digest: sha256:b3b8d3464fce7788c49618571360dff909b8bd8cf8a6a1c8f2f7e402ef174ea1
+generated: "2023-10-26T14:30:34.018528486+08:00"

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: kubefin-agent
+description: A Helm chart for kubefin-agent
+sources:
+  - https://github.com/kubefin/kubefin
+keywords:
+  - kubefin
+  - kubefin-agent
+  - FinOps
+type: application
+version: 0.1.0
+appVersion: "0.1.2"

@@ -1,0 +1,12 @@
+{{- if .Values.otel.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kubefin-agent.fullname" . }}-otel-collector-config
+  labels:
+    {{- include "kubefin-agent.labels" . | nindent 4 }}
+    app: otel-collector
+data:
+  config.yaml: |
+    {{- tpl .Values.otel.config $ | nindent 4 }}
+{{- end }}

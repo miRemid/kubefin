@@ -1,0 +1,16 @@
+{{- if .Values.mimir.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kubefin.fullname" . }}-mimir
+  labels:
+    {{- include "kubefin-mimir.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ .Values.mimir.service.port }}
+      targetPort: http
+  selector:
+    {{- include "kubefin-mimir.selectorLabels" . | nindent 4 }}
+{{- end }}

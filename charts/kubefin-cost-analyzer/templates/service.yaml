@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kubefin-cost-analyzer.fullname" . }}
+  labels:
+    {{- include "kubefin-cost-analyzer.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: server
+      port: {{ .Values.costAnalyzer.service.port }}
+      targetPort: server
+  {{- if not .Values.standalone }}
+    - name: dashboard
+      port: {{ .Values.dashboard.service.port }}
+      targetPort: dashboard
+  {{- end }}
+  selector:
+    {{- include "kubefin-cost-analyzer.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.standalone }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kubefin-dashboard.fullname" . }}
+  labels:
+    {{- include "kubefin-dashboard.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: dashboard
+      port: {{ .Values.dashboard.service.port }}
+      targetPort: dashboard
+  selector:
+    {{- include "kubefin-dashboard.selectorLabels" . | nindent 4 }}
+{{- end }}

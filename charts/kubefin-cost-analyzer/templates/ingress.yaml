@@ -1,0 +1,73 @@
+{{- if .Values.ingress.enabled -}}
+{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ include "kubefin-dashboard.fullname" . }}
+  labels:
+    {{- include "kubefin-dashboard.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                {{- if .Values.standalone }}
+                name: {{ include "kubefin-dashboard.fullname" . }}
+                {{- else }}
+                name: {{ include "kubefin-cost-analyzer.fullname" . }}
+                {{- end }}
+                port:
+                  name: dashboard
+              {{- else }}
+              {{- if .Values.standalone }}
+              serviceName: {{ include "kubefin-dashboard.fullname" . }}
+              {{- else }}
+              serviceName: {{ include "kubefin-cost-analyzer.fullname" . }}
+              {{- end }}
+              servicePort: {{ .Values.dashboard.service.port }}
+              {{- end }}
+          - path: /api/v1
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ include "kubefin-cost-analyzer.fullname" . }}
+                port:
+                  name: server
+              {{- else }}
+              serviceName: {{ include "kubefin-cost-analyzer.fullname" . }}
+              servicePort: {{ .Values.costAnalyzer.service.port }}
+              {{- end }}
+{{- end }}

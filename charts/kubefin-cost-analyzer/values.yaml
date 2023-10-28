@@ -1,0 +1,125 @@
+# If true, deploy cost-analyzer and dashboard separately, otherwise deploy cost-analyzer and dashboard in the same pod.
+#
+# Note: Since the dashboard image adds the kubefin-cost-analyzer api route, the dashboard calls the api through a reverse
+# proxy, and if you use a separate deployment to access the dashboard through the kubectl port-forward method, the call
+# to the api will fail, and you will need to use the ingress exposed service!
+# For more information: https://github.com/kubefin/kubefin/tree/main/dashboard/nginx-config/default.conf
+standalone: false
+
+imagePullSecrets: []
+
+costAnalyzer:
+  replicaCount: 1
+  image:
+    repository: kubefin/kubefin-cost-analyzer
+    pullPolicy: IfNotPresent
+    tag: "v0.1.2"
+
+  # Backend TSDB storage query endpoints
+  # Example:
+  # Querying data from prometheus. query_backend_endpoint: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+  # Querying data from thanos. query_backend_endpoint: "http://thanos-query-frontend.example.local:10902"
+  # Querying data from mimir. query_backend_endpoint: "http://mimir-query-frontend.example.local:9009/prometheus"
+  # Querying data from victoriametrics. query_backend_endpoint: "http://vmselect.example.local:8481/select/<accountID>/prometheus"
+  query_backend_endpoint: ""
+
+  extraArgs: []
+    # - --v=6
+
+  resources: {}
+  #  requests:
+  #    cpu: 500m
+  #    memory: 1Gi
+  #  limits:
+  #    cpu: 500m
+  #    memory: 1Gi
+
+  service:
+    port: 8080
+
+  podAnnotations: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  # Affinity Configuration, String Type.
+  # affinity: ""
+  # Example:
+  # affinity: |
+  #   podAntiAffinity:
+  #     preferredDuringSchedulingIgnoredDuringExecution:
+  #       - podAffinityTerm:
+  #           topologyKey: kubernetes.io/hostname
+  #           labelSelector:
+  #             matchLabels:
+  #               {{- include "kubefin-cost-analyzer.selectorLabels" . | nindent 12 }}
+  #         weight: 100
+
+dashboard:
+  replicaCount: 1
+  image:
+    repository: kubefin/kubefin-dashboard
+    pullPolicy: IfNotPresent
+    tag: "v0.1.2"
+
+  resources: {}
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256Mi
+  #  limits:
+  #    cpu: 100m
+  #    memory: 256Mi
+
+  service:
+    port: 3000
+
+  Probe:
+    startupProbe:
+      enabled: false
+      initialDelaySeconds: 3
+      failureThreshold: 10
+      periodSeconds: 10
+      timeoutSeconds: 1
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 3
+      failureThreshold: 2
+      successThreshold: 2
+      periodSeconds: 10
+      timeoutSeconds: 3
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 3
+      failureThreshold: 2
+      periodSeconds: 10
+      timeoutSeconds: 3
+
+  podAnnotations: {}
+
+  # Affinity Configuration, String Type.
+  # affinity: ""
+  # Example:
+  # affinity: |
+  #   podAntiAffinity:
+  #     preferredDuringSchedulingIgnoredDuringExecution:
+  #       - podAffinityTerm:
+  #           topologyKey: kubernetes.io/hostname
+  #           labelSelector:
+  #             matchLabels:
+  #               {{- include "kubefin-dashboard.selectorLabels" . | nindent 12 }}
+  #         weight: 100
+
+  nodeSelector: {}
+
+  tolerations: []
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  host: kubefin-dashboard.example.local
+  tls: {}
+    # secretName: kubefin-dashboard.example.local

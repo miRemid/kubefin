@@ -1,0 +1,75 @@
+{{- if .Values.mimir.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kubefin.fullname" . }}-mimir
+  labels:
+    {{- include "kubefin-mimir.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "kubefin-mimir.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "kubefin.fullname" . }}-mimir
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/mimir-config.yaml") . | sha256sum }}
+      labels:
+        {{- include "kubefin-mimir.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: mimir
+          args:
+            - -target=all
+            - --config.file=/etc/mimir/config.yaml
+          image: "{{ .Values.mimir.image.repository }}:{{ .Values.mimir.image.tag }}"
+          imagePullPolicy: {{ .Values.mimir.image.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.mimir.service.port }}
+          {{- with .Values.mimir.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.mimir.Probe.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: {{ .Values.mimir.Probe.startupProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.mimir.Probe.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.mimir.Probe.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.mimir.Probe.startupProbe.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.mimir.Probe.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: {{ .Values.mimir.Probe.readinessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.mimir.Probe.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.mimir.Probe.readinessProbe.successThreshold }}
+            periodSeconds: {{ .Values.mimir.Probe.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.mimir.Probe.readinessProbe.timeoutSeconds }}
+          {{- end }}
+          {{- if .Values.mimir.Probe.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: {{ .Values.mimir.Probe.livenessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.mimir.Probe.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.mimir.Probe.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.mimir.Probe.livenessProbe.timeoutSeconds }}
+          {{- end }}
+          volumeMounts:
+            - name: mimir-config
+              mountPath: /etc/mimir/config.yaml
+              subPath: config.yaml
+              readOnly: true
+      volumes:
+        - name: mimir-config
+          configMap:
+            name: {{ include "kubefin.fullname" . }}-mimir-config
+{{- end }}

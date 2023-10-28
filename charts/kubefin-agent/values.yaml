@@ -1,0 +1,118 @@
+replicaCount: 1
+
+image:
+  repository: kubefin/kubefin-agent
+  tag: "v0.1.2"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+extraArgs: []
+# - --v=6
+
+config: |
+  CLOUD_PROVIDER: "default"
+  CLUSTER_NAME: "kubefin-server"
+  CLUSTER_ID: ""
+  CUSTOM_CPU_CORE_HOUR_PRICE: ""
+  CUSTOM_RAM_GB_HOUR_PRICE: ""
+  NODE_CPU_DEVIATION: "0.0"
+  NODE_RAM_DEVIATION: "0.4"
+  CPUCORE_RAMGB_PRICE_RATIO: "3"
+
+resources: {}
+  # requests:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+
+podMonitor:
+  # Create PodMonitor Resource for scraping metrics using PrometheusOperator, set to true to create a Pod Monitor Entry
+  enabled: false
+  # The name of the label on the target service to use as the job name in prometheus.
+  jobLabel: ""
+  # Interval at which metrics should be scraped
+  interval: 15s
+  # The timeout after which the scrape is ended
+  scrapeTimeout: ""
+  # Metrics relabelings to add to the scrape endpoint
+  metricRelabelings: []
+  # RelabelConfigs to apply to samples before scraping
+  relabelings: []
+  # Additional labels
+  additionalLabels: {}
+
+otel:
+  enabled: true
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.72.0"
+    pullPolicy: IfNotPresent
+
+  resources:
+    # requests:
+    #   cpu: 500m
+    #   memory: 1500Mi
+    # limits:
+    #   cpu: 500m
+    #   memory: 1500Mi
+
+  config: |
+    receivers:
+      prometheus_simple:
+        # The allowed min period is 15s
+        collection_interval: 15s
+        # Kubefin-agent metrics endpoint
+        endpoint: "127.0.0.1:8080"
+        metrics_path: "/metrics"
+        use_service_account: false
+    processors:
+      batch:
+      memory_limiter:
+        # 80% of maximum memory up to 2G
+        limit_mib: 1500
+        # 25% of limit up to 2G
+        spike_limit_mib: 512
+        check_interval: 5s
+    extensions:
+      zpages: {}
+      memory_ballast:
+        # Memory Ballast size should be max 1/3 to 1/2 of memory.
+        size_mib: 683
+    exporters:
+      prometheusremotewrite:
+        # namespace: ""
+        # Prometheus data format compatible indicator reporting interface.
+        # Example:
+        # Insert data into thanos. endpoint: "http://thanos-receive.example.local/api/v1/receive"
+        # Insert data into mimir. endpoint: "http://mimir-distributor.example.local/api/v1/push"
+        endpoint: "http://mimir.kubefin.svc.cluster.local:9009/api/v1/push"
+    service:
+      telemetry:
+      extensions: [zpages, memory_ballast]
+      pipelines:
+        metrics:
+          receivers: [prometheus_simple]
+          processors: [memory_limiter, batch]
+          exporters: [prometheusremotewrite]
+
+podAnnotations: {}
+
+# Affinity Configuration, String Type.
+affinity: ""
+# Example:
+# affinity: |
+#   podAntiAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#       - podAffinityTerm:
+#           labelSelector:
+#             matchLabels:
+#               {{- include "kubefin-agent.selectorLabels" . | nindent 12 }}
+#           topologyKey: kubernetes.io/hostname
+#         weight: 100
+
+nodeSelector: {}
+
+tolerations: []
