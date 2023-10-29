@@ -24,7 +24,7 @@ env:
   KO_FLAGS: --platform=linux/amd64
 
 jobs:
-  test:
+  e2e-test:
     runs-on: kubefin-e2e-env
     strategy:
       fail-fast: true
@@ -34,6 +34,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: crazy-max/ghaction-setup-docker@v2
 
     - name: Set up Go 1.20.x
       uses: actions/setup-go@v3
@@ -68,4 +71,4 @@ jobs:
       with:
         cluster-resources: nodes,namespaces
         namespace-resources: pods,svc,deployment,statefulset
-        artifact-name: logs-${{ matrix.k8s-version}}
+        artifact-name: logs-${{ matrix.k8s-version }}

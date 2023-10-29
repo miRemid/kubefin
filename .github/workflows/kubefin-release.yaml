@@ -77,6 +77,7 @@ jobs:
         file: ./dashboard/Dockerfile
         platforms: |
           linux/amd64
+          linux/arm64
         push: true
         tags: kubefin/kubefin-dashboard:${{ github.ref_name }}
 
