@@ -26,6 +26,7 @@ const (
 	KubeFinListKind   = "List"
 
 	CloudProviderAck     = "ack"
+	CloudProviderEks     = "eks"
 	CloudProviderDefault = "default"
 )
 
