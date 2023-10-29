@@ -24,6 +24,7 @@ env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKERHUB_USER_NAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   TAG: ${{ github.ref_name }}
+  KO_FLAGS: "--platform=linux/amd64,linux/arm64"
 
 jobs:
   kubefin-release:
@@ -80,4 +81,3 @@ jobs:
           linux/arm64
         push: true
         tags: kubefin/kubefin-dashboard:${{ github.ref_name }}
-
